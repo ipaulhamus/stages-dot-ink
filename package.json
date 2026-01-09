@@ -1,0 +1,15 @@
+{
+  "name": "stages-dot-ink",
+  "version": "1.0.0",
+  "description": "Cross-platform Splatoon stage list desktop widget.",
+  "main": "main.js",
+  "scripts": {
+    "start" : "electron .",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "GalaxyKirby",
+  "license": "MIT",
+  "devDependencies": {
+    "electron": "^39.2.7"
+  }
+}
