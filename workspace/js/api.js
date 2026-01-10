@@ -1,12 +1,11 @@
-const { Rotation } = require("./dataTypes");
-
 //All functions for fetching data from the API are here. This is where we will fetch the stage list and other data from the API.
-module.exports = { fetchScedule, parseSceduleData };
+
+//import { Rotation, Stage, Splatfest, FestTeam } from './dataTypes.js';
 
 const API_URL = 'https://splatoon3.ink/data/schedules.json';
 
 //Fetches the scedule data from the API and returns it as a JSON object.
-async function fetchScedule() {
+export async function fetchScedule() {
     try{
         const response = await fetch (API_URL);
 
@@ -25,7 +24,7 @@ async function fetchScedule() {
 }
 
 
-function parseSceduleData(sceduleData, type) {
+export function parseSceduleData(sceduleData, type) {
     //truthy/falsy check for sceduleData and the type of data
     if(!sceduleData || !sceduleData.data) {
         console.error(`Invalid scedule data or type: ${type}`);
@@ -50,7 +49,7 @@ function parseSceduleData(sceduleData, type) {
     }
 }
 
-function returnRotationByType(parsedData, type, index) {
+export function returnRotationByType(parsedData, type, index) {
     if(!parsedData) {
         console.error(`No data to return for type: ${type}`);
         return null;
@@ -67,17 +66,53 @@ function returnRotationByType(parsedData, type, index) {
             case 'xSchedules':
                 //return new Rotation(parsedData[index].xMatchSetting)
             case 'festSchedules':
-                mode = parsedData[index].festMatchSettings.name;
-                startTime = parsedData[index].startTime;
-                endTime = parsedData[index].endTime;
+                mode = parsedData.nodes[index].festMatchSettings[0].vsRule.name;
+                console.log('Mode:', mode);
+                startTime = parsedData.nodes[index].startTime;
+                endTime = parsedData.nodes[index].endTime;
                 
                 //Iterating through the stage objects
-                stages = parsedData[index].festMatchSettings.vsStages.map(stage => new Stage(stage.name));
+                stages = parsedData.nodes[index].festMatchSettings[0].vsStages.map(stage => new Stage(stage.name));
                 
                 return new Rotation(mode, startTime, endTime, stages);
             default:
                 console.error(`Unknown data type: ${type}`);
                 return null;
         }
+    }
+}
+
+export class Rotation {
+    constructor(mode, startTime, endTime, stages) {
+        this.mode = mode;
+        this.startTime = startTime;
+        this.endTime = endTime;
+        this.stages = stages;
+    }
+}
+
+//Leaving images blank for now, but they can be added later when we have the data from the API
+export class Stage {
+    constructor(name) {
+        this.name = name;
+        this.image = "";
+    }
+}
+
+//If there is a splatfest, splatoon3.ink will return a fest object
+export class Splatfest {
+    constructor(name, startTime, endTime, teams) {
+        this.name = name;
+        this.startTime = startTime;
+        this.endTime = endTime;
+        this.teams = teams;
+    }
+}
+
+//Leaving images blank for now, but they can be added later when we have the data from the API
+export class FestTeam {
+    constructor(name) {
+        this.name = name;
+        this.image = "";
     }
 }

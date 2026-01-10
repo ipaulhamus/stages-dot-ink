@@ -6,7 +6,7 @@
  *     - Programmatically open DevTools for the created window: win.webContents.openDevTools().
  * - To forward renderer logs to the terminal during development, run Electron with logging enabled (e.g. set ELECTRON_ENABLE_LOGGING=1 or use --enable-logging).
  */
-import { fetchScedule, parseSceduleData } from './workspace/js/api.js';
+import { fetchScedule, parseSceduleData, returnRotationByType } from './workspace/js/api.js';
 import { app, BrowserWindow } from 'electron';
 
 const createWindow = () => {
@@ -24,13 +24,20 @@ app.on('browser-window-created', (event, window) => {
         fetchScedule()
             .then(data => {
                 if (data) {
-                    const regularSchedules = parseSceduleData(data, dataTypes.regular);
-                    const text = JSON.stringify(regularSchedules);
-                    // Safely set the element's innerText in the renderer
-                    window.webContents.executeJavaScript(
-                        `const el = document.getElementById('regular-battle-info'); if (el) el.innerText = ${JSON.stringify(text)};`
-                    ).catch(err => console.error('executeJavaScript error:', err));
-                    console.log('Regular Schedules:', regularSchedules);
+                    console.log('Schedule data fetched successfully:', data);
+                    console.log('Data types.fest:' , dataTypes.fest);
+                    const festSchedule = parseSceduleData(data, dataTypes.fest);
+                    //const text = JSON.stringify(festSchedule);
+                    console.log('Parsed Fest Schedule:', festSchedule);
+                    const currentFestRotation = returnRotationByType(festSchedule, dataTypes.fest, 0);
+                    if(currentFestRotation) {
+                        console.log('Current Fest Rotation:', currentFestRotation);
+                        //Use returned Roation object to create a string to display in the renderer
+                        const text = `Current Fest Rotation:\nMode: ${currentFestRotation.mode}\nStart Time: ${currentFestRotation.startTime}\nEnd Time: ${currentFestRotation.endTime}\nStages:\n${currentFestRotation.stages.map(stage => `- ${stage.name}`).join('\n')}`;
+                        window.webContents.executeJavaScript(
+                            `const el = document.getElementById('regular-battle-info'); if (el) el.innerText = ${JSON.stringify(text)};`
+                        ).catch(err => console.error('executeJavaScript error:', err));
+                    }
                 }
             })
             .catch(error => {
@@ -62,4 +69,4 @@ const dataTypes = {
     ranked: 'bankaraSchedules',
     xmatch: 'xSchedules',
     fest: 'festSchedules'
-}
+} 
