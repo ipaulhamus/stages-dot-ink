@@ -1,32 +1,4 @@
-/**
- * Main process entry for the Electron application.
- *
- * Responsibilities:
- * - Create the main BrowserWindow and load the renderer (main.html).
- * - On renderer 'did-finish-load', fetch schedule data (via fetchScedule),
- *   parse it (via parseSceduleData) and safely inject text into the renderer DOM
- *   using webContents.executeJavaScript.
- * - Manage application lifecycle events (activate, window-all-closed).
- *
- * @module main
- *
- * @function createWindow
- * @description Create a BrowserWindow sized 800x600 and load './main.html'.
- * @returns {import('electron').BrowserWindow} The created BrowserWindow instance.
- *
- * @constant {Object} dataTypes
- * @description Keys used to identify schedule data types to avoid typos when calling parseSceduleData.
- * @property {string} regular - 'regularSchedules'
- * @property {string} ranked - 'ranked'
- * @property {string} xmatch - 'xmatch'
- * @property {string} salmonRun - 'salmonRun'
- * @property {string} fest - 'fest'
- *
- * @remarks
- * - The code listens for the 'browser-window-created' event and attaches a
- *   'did-finish-load' handler to the window's webContents to perform the fetch/parse/inject flow.
- * - Errors during fetching or executeJavaScript are logged to the console.
- *
+/*
  * Viewing console logs:
  * - Main process logs (console.log in this file) appear in the terminal that launched the Electron app.
  * - Renderer logs (console.log inside the loaded page) appear in the renderer DevTools:
@@ -87,8 +59,7 @@ app.on('window-all-closed', () => {
 //Object to make data types easier to manage and avoid typos when calling the parseSceduleData function
 const dataTypes = {
     regular: 'regularSchedules',
-    ranked: 'ranked',
-    xmatch: 'xmatch',
-    salmonRun: 'salmonRun',
-    fest: 'fest'
+    ranked: 'bankaraSchedules',
+    xmatch: 'xSchedules',
+    fest: 'festSchedules'
 }
