@@ -9,10 +9,15 @@
 import { fetchScedule, parseSceduleData, returnRotationByType } from './workspace/js/api.js';
 import { app, BrowserWindow } from 'electron';
 
+//Creating a window that functions like a desktop widget to display the current schedule data from the API. This will be the main window of the app and will load the main.html file.
 const createWindow = () => {
     const win = new BrowserWindow({
-        width: 800,
-        height: 600
+        width: 400,
+        height: 300,
+        frame: false,
+        transparent: true,
+        alwaysOnTop: true,
+        resizable: false
     })
 
     win.loadFile('./main.html');
