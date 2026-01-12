@@ -9,11 +9,17 @@
 import { fetchScedule, parseSceduleData, returnRotationByType } from './workspace/js/api.js';
 import { app, BrowserWindow } from 'electron';
 
+const dataTypes = ["regularSchedules", "bankaraSchedules", "xSchedules", "festSchedules"];
+
+const htmlElementIds = ["regular-battle-info", "bankara-battle-info", "xmatch-battle-info", "fest-battle-info"];
+
+//== Window Creation and App Lifecycle ==//
+
 //Creating a window that functions like a desktop widget to display the current schedule data from the API. This will be the main window of the app and will load the main.html file.
 const createWindow = () => {
     const win = new BrowserWindow({
         width: 400,
-        height: 300,
+        height: 600,
         frame: false,
         transparent: true,
         alwaysOnTop: true,
@@ -21,6 +27,7 @@ const createWindow = () => {
     })
 
     win.loadFile('./main.html');
+    win.webContents.openDevTools();
 }
 
 // When a window finishes loading, fetch schedule in the main process and update the renderer DOM
@@ -29,24 +36,108 @@ app.on('browser-window-created', (event, window) => {
         fetchScedule()
             .then(data => {
                 if (data) {
+                    /*
                     console.log('Schedule data fetched successfully:', data);
                     console.log('Data types.fest:' , dataTypes.fest);
                     const festSchedule = parseSceduleData(data, dataTypes.fest);
-                    //const text = JSON.stringify(festSchedule);
+
                     console.log('Parsed Fest Schedule:', festSchedule);
                     const currentFestRotation = returnRotationByType(festSchedule, dataTypes.fest, 0);
+
                     if(currentFestRotation) {
                         console.log('Current Fest Rotation:', currentFestRotation);
+
                         //Use returned Roation object to create a string to display in the renderer
                         const text = `Current Fest Rotation:\nMode: ${currentFestRotation.mode}\nStart Time: ${currentFestRotation.startTime}\nEnd Time: ${currentFestRotation.endTime}\nStages:\n${currentFestRotation.stages.map(stage => `- ${stage.name}`).join('\n')}`;
                         window.webContents.executeJavaScript(
                             `const el = document.getElementById('regular-battle-info'); if (el) el.innerText = ${JSON.stringify(text)};`
                         ).catch(err => console.error('executeJavaScript error:', err));
                     }
+                    */
+                   //Iterate through each data type and update the corresponding element in the renderer
+
+                    let regularData;
+                    let bankaraData;
+                    let xData;
+                    let festData;
+
+                   for(let i = 0; i < dataTypes.length; i++) {
+
+                        switch(dataTypes[i]) {
+                            case 'festSchedules':
+                                festData = "";
+                                
+                                window.webContents.executeJavaScript(
+                                    `const festEl = document.getElementById('${htmlElementIds[i]}'); 
+                                    if (festEl) festEl.innerText = 'No Splatfest Data Currently';`
+                                ).catch(err => console.error('executeJavaScript error:', err));
+
+                                break;
+
+                            case 'bankaraSchedules':
+                                
+                                bankaraData = parseSceduleData(data, dataTypes[i]);
+                                console.log('Parsed Bankara Schedule:', bankaraData);
+                                if(bankaraData) {
+                                    console.log('Passed Bankara Data Check!');  
+                                    const currentBankaraRotation = returnRotationByType(bankaraData, dataTypes[i], 0);
+                                    if(currentBankaraRotation) {
+                                        bankaraData = `Current Bankara Battle Rotation:\nMode: ${currentBankaraRotation.mode}\nStart Time: ${currentBankaraRotation.startTime}\nEnd Time: ${currentBankaraRotation.endTime}\nStages:\n${currentBankaraRotation.stages.map(stage => `- ${stage.name}`).join('\n')}`;
+                                    }
+                                }
+                                
+                                console.log('Bankara Data to Display:', htmlElementIds[i]);
+                                window.webContents.executeJavaScript(
+                                    `const bankaraEl = document.getElementById('${htmlElementIds[i]}'); 
+                                    if (bankaraEl) bankaraEl.innerText = ${JSON.stringify(bankaraData)};`
+                                ).catch(err => console.error('executeJavaScript error:', err));
+
+                                break;
+                            case 'regularSchedules':
+
+                                regularData = parseSceduleData(data, dataTypes[i]);
+                                if(regularData) {
+                                    const currentRegularRotation = returnRotationByType(regularData, dataTypes[i], 0);
+                                    if(currentRegularRotation) {
+                                        regularData = `Current Regular Battle Rotation:\nMode: ${currentRegularRotation.mode}\nStart Time: ${currentRegularRotation.startTime}\nEnd Time: ${currentRegularRotation.endTime}\nStages:\n${currentRegularRotation.stages.map(stage => `- ${stage.name}`).join('\n')}`;
+                                    }
+                                }
+                                
+                                window.webContents.executeJavaScript(
+                                    `const regularEl = document.getElementById('${htmlElementIds[i]}'); 
+                                    if (regularEl) regularEl.innerText = ${JSON.stringify(regularData)};`
+                                ).catch(err => console.error('executeJavaScript error:', err));
+                                break;
+
+                            case 'xSchedules':
+                                xData = parseSceduleData(data, dataTypes[i]);
+                                if(xData) {
+                                    const currentXRotation = returnRotationByType(xData, dataTypes[i], 0);
+                                    if(currentXRotation) {
+                                        xData = `Current X Match Battle Rotation:\nMode: ${currentXRotation.mode}\nStart Time: ${currentXRotation.startTime}\nEnd Time: ${currentXRotation.endTime}\nStages:\n${currentXRotation.stages.map(stage => `- ${stage.name}`).join('\n')}`;
+                                    }
+                                }
+                                
+                                window.webContents.executeJavaScript(
+                                    `const xEl = document.getElementById('${htmlElementIds[i]}'); 
+                                    if (xEl) xEl.innerText = ${JSON.stringify(xData)};`
+                                ).catch(err => console.error('executeJavaScript error:', err));
+
+                                break;
+                            default:
+                                console.error(`Unknown data type: ${dataTypes[i]}`);
+                                break;
+                        }
+                   }
                 }
             })
             .catch(error => {
                 console.error('Error fetching schedule:', error);
+                window.webContents.executeJavaScript(
+                    `const errorEl = document.getElementById('error-div'); 
+                    if (errorEl) errorEl.style.display = 'block';`
+                ).catch(err => console.error('executeJavaScript error:', err));
+
             });
     });
 });
@@ -66,12 +157,9 @@ app.on('window-all-closed', () => {
     if(process.platform !== 'darwin') {
         app.quit();
     }
+    else {
+        console.log('All windows closed, but not quitting on macOS');
+    }
 });
 
-//Object to make data types easier to manage and avoid typos when calling the parseSceduleData function
-const dataTypes = {
-    regular: 'regularSchedules',
-    ranked: 'bankaraSchedules',
-    xmatch: 'xSchedules',
-    fest: 'festSchedules'
-} 
+//== Window Setup End ==//

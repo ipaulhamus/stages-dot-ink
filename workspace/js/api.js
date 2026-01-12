@@ -4,6 +4,42 @@
 
 const API_URL = 'https://splatoon3.ink/data/schedules.json';
 
+// Define classes before they are used
+export class Rotation {
+    constructor(mode, startTime, endTime, stages) {
+        this.mode = mode;
+        this.startTime = startTime;
+        this.endTime = endTime;
+        this.stages = stages;
+    }
+}
+
+//Leaving images blank for now, but they can be added later when we have the data from the API
+export class Stage {
+    constructor(name) {
+        this.name = name;
+        this.image = "";
+    }
+}
+
+//If there is a splatfest, splatoon3.ink will return a fest object
+export class Splatfest {
+    constructor(name, startTime, endTime, teams) {
+        this.name = name;
+        this.startTime = startTime;
+        this.endTime = endTime;
+        this.teams = teams;
+    }
+}
+
+//Leaving images blank for now, but they can be added later when we have the data from the API
+export class FestTeam {
+    constructor(name) {
+        this.name = name;
+        this.image = "";
+    }
+}
+
 //Fetches the scedule data from the API and returns it as a JSON object.
 export async function fetchScedule() {
     try{
@@ -51,68 +87,69 @@ export function parseSceduleData(sceduleData, type) {
 
 export function returnRotationByType(parsedData, type, index) {
     if(!parsedData) {
+
         console.error(`No data to return for type: ${type}`);
         return null;
+
     }
     else {
         let mode, startTime, endTime, stages;
-
+        
         switch(type) {
-            //These are TODO until there isn't a splatgfest, but they will be used to return the correct data objects for each type of schedule
+            
             case 'regularSchedules':
-                //return new Rotation(parsedData[index].regularMatchSetting)
+
+                mode = parsedData.nodes[index].regularMatchSetting.vsRule.name;
+                startTime = parsedData.nodes[index].startTime;
+                endTime = parsedData.nodes[index].endTime;
+                
+                stages = parsedData.nodes[index].regularMatchSetting.vsStages.map(stage => new Stage(stage.name));
+
+                return new Rotation(mode, startTime, endTime, stages);
+                break;
+
             case 'bankaraSchedules':
-                //return new Rotation(parsedData[index].bankaraMatchSetting)
+                console.log('Bankara Match Settings:', parsedData.nodes[index].bankaraMatchSettings);
+                console.log('Bankara Match Settings[0]:', parsedData.nodes[index].bankaraMatchSettings[0].vsRule);
+                console.log('Bankara Match Settings[0].vsStages:', parsedData.nodes[index].bankaraMatchSettings[0].vsStages);
+                mode = parsedData.nodes[index].bankaraMatchSettings[0].vsRule.name;
+                console.log('Mode:', mode);
+                startTime = parsedData.nodes[index].startTime;
+                console.log('Start Time:', startTime);
+                endTime = parsedData.nodes[index].endTime;
+                console.log('End Time:', endTime);
+                stages = parsedData.nodes[index].bankaraMatchSettings[0].vsStages.map(stage => new Stage(stage.name));
+                console.log('Stages:', stages.map(stage => stage.name));
+                
+                return new Rotation(mode, startTime, endTime, stages);
+                break;
+
             case 'xSchedules':
-                //return new Rotation(parsedData[index].xMatchSetting)
+
+                mode = parsedData.nodes[index].xMatchSetting.vsRule.name;
+                startTime = parsedData.nodes[index].startTime;
+                endTime = parsedData.nodes[index].endTime;
+                
+                stages = parsedData.nodes[index].xMatchSetting.vsStages.map(stage => new Stage(stage.name));
+                
+                return new Rotation(mode, startTime, endTime, stages);
+                break;
+
             case 'festSchedules':
-                mode = parsedData.nodes[index].festMatchSettings[0].vsRule.name;
+
+                mode = parsedData.nodes[index].festMatchSettings.vsRule.name;
                 console.log('Mode:', mode);
                 startTime = parsedData.nodes[index].startTime;
                 endTime = parsedData.nodes[index].endTime;
                 
-                //Iterating through the stage objects
-                stages = parsedData.nodes[index].festMatchSettings[0].vsStages.map(stage => new Stage(stage.name));
+                stages = parsedData.nodes[index].festMatchSettings.vsStages.map(stage => new Stage(stage.name));
                 
                 return new Rotation(mode, startTime, endTime, stages);
+                break;
             default:
                 console.error(`Unknown data type: ${type}`);
                 return null;
         }
     }
-}
 
-export class Rotation {
-    constructor(mode, startTime, endTime, stages) {
-        this.mode = mode;
-        this.startTime = startTime;
-        this.endTime = endTime;
-        this.stages = stages;
-    }
-}
-
-//Leaving images blank for now, but they can be added later when we have the data from the API
-export class Stage {
-    constructor(name) {
-        this.name = name;
-        this.image = "";
-    }
-}
-
-//If there is a splatfest, splatoon3.ink will return a fest object
-export class Splatfest {
-    constructor(name, startTime, endTime, teams) {
-        this.name = name;
-        this.startTime = startTime;
-        this.endTime = endTime;
-        this.teams = teams;
-    }
-}
-
-//Leaving images blank for now, but they can be added later when we have the data from the API
-export class FestTeam {
-    constructor(name) {
-        this.name = name;
-        this.image = "";
-    }
 }
