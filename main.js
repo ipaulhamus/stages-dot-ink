@@ -27,7 +27,7 @@ const createWindow = () => {
     })
 
     win.loadFile('./main.html');
-    win.webContents.openDevTools();
+    //win.webContents.openDevTools();
 }
 
 // When a window finishes loading, fetch schedule in the main process and update the renderer DOM
@@ -36,26 +36,7 @@ app.on('browser-window-created', (event, window) => {
         fetchScedule()
             .then(data => {
                 if (data) {
-                    /*
-                    console.log('Schedule data fetched successfully:', data);
-                    console.log('Data types.fest:' , dataTypes.fest);
-                    const festSchedule = parseSceduleData(data, dataTypes.fest);
-
-                    console.log('Parsed Fest Schedule:', festSchedule);
-                    const currentFestRotation = returnRotationByType(festSchedule, dataTypes.fest, 0);
-
-                    if(currentFestRotation) {
-                        console.log('Current Fest Rotation:', currentFestRotation);
-
-                        //Use returned Roation object to create a string to display in the renderer
-                        const text = `Current Fest Rotation:\nMode: ${currentFestRotation.mode}\nStart Time: ${currentFestRotation.startTime}\nEnd Time: ${currentFestRotation.endTime}\nStages:\n${currentFestRotation.stages.map(stage => `- ${stage.name}`).join('\n')}`;
-                        window.webContents.executeJavaScript(
-                            `const el = document.getElementById('regular-battle-info'); if (el) el.innerText = ${JSON.stringify(text)};`
-                        ).catch(err => console.error('executeJavaScript error:', err));
-                    }
-                    */
                    //Iterate through each data type and update the corresponding element in the renderer
-
                     let regularData;
                     let bankaraData;
                     let xData;

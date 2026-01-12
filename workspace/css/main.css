@@ -1,0 +1,39 @@
+:root {
+    --background-color: #233D4D;
+    --primary-color: #F5F2F2;
+    --secondary-color: #FF6B6B;
+}
+
+#main-content {
+    background-color: var(--background-color);
+    color: var(--primary-color);
+    padding: 1.5rem;
+    font-family: 'Courier New', Courier, monospace;
+    border-radius: 8px;
+    box-shadow: 10px 10px 0px rgba(0, 0, 0, 0.5);
+}
+
+/* Text Styles */
+
+.title-text {
+    color: var(--secondary-color);
+    font-size: 1.5rem;
+    font-weight: bolder;
+}
+
+.info-text {
+    color: var(--primary-color);
+    font-size: 1.3rem;
+    font-weight: bold;
+
+    margin-left: 0.7rem;
+}
+
+/* Layout Styles */
+.schedule-section {
+    margin-bottom: 1rem;
+    margin-left: 0.5rem;
+    width: fit-content;
+
+    display: flex;
+}
