@@ -9,9 +9,9 @@
 import { fetchScedule, parseSceduleData, returnRotationByType } from './workspace/js/api.js';
 import { app, BrowserWindow } from 'electron';
 
-const dataTypes = ["regularSchedules", "bankaraSchedules", "xSchedules", "festSchedules"];
+const dataTypes = ["regularSchedules", "bankaraSchedules", "bankaraSchedules-series", "xSchedules", "festSchedules"];
 
-const htmlElementIds = ["regular-battle-info", "bankara-battle-info", "xmatch-battle-info", "fest-battle-info"];
+const htmlElementIds = ["regular-battle-info", "bankara-battle-info", "bankara-series-battle-info", "xmatch-battle-info", "fest-battle-info"];
 
 //== Window Creation and App Lifecycle ==//
 
@@ -39,6 +39,7 @@ app.on('browser-window-created', (event, window) => {
                    //Iterate through each data type and update the corresponding element in the renderer
                     let regularData;
                     let bankaraData;
+                    let bankaraSeriesData;
                     let xData;
                     let festData;
 
@@ -74,6 +75,26 @@ app.on('browser-window-created', (event, window) => {
                                 ).catch(err => console.error('executeJavaScript error:', err));
 
                                 break;
+
+                            case 'bankaraSchedules-series':
+                                bankaraSeriesData = parseSceduleData(data, 'bankaraSchedules-series');
+                                console.log('Parsed Bankara Series Schedule:', bankaraSeriesData);
+                                if(bankaraSeriesData) {
+                                    console.log('Passed Bankara Series Data Check!');  
+                                    const currentBankaraSeriesRotation = returnRotationByType(bankaraSeriesData, 'bankaraSchedules-series', 0);
+                                    if(currentBankaraSeriesRotation) {
+                                        bankaraSeriesData = `Current Bankara Series Battle Rotation:\nMode: ${currentBankaraSeriesRotation.mode}\nStart Time: ${currentBankaraSeriesRotation.startTime}\nEnd Time: ${currentBankaraSeriesRotation.endTime}\nStages:\n${currentBankaraSeriesRotation.stages.map(stage => `- ${stage.name}`).join('\n')}`;
+                                    }
+                                }
+                                
+                                console.log('Bankara Series Data to Display:', htmlElementIds[i]);
+                                window.webContents.executeJavaScript(
+                                    `const bankaraSeriesEl = document.getElementById('${htmlElementIds[i]}'); 
+                                    if (bankaraSeriesEl) bankaraSeriesEl.innerText = ${JSON.stringify(bankaraSeriesData)};`
+                                ).catch(err => console.error('executeJavaScript error:', err));
+
+                                break;
+                            
                             case 'regularSchedules':
 
                                 regularData = parseSceduleData(data, dataTypes[i]);

@@ -73,6 +73,8 @@ export function parseSceduleData(sceduleData, type) {
                 return sceduleData.data.regularSchedules || null;
             case 'bankaraSchedules':
                 return sceduleData.data.bankaraSchedules || null;
+            case 'bankaraSchedules-series':
+                return sceduleData.data.bankaraSchedules || null;
             case 'xSchedules':
                 return sceduleData.data.xSchedules || null;
             case 'festSchedules':
@@ -120,6 +122,18 @@ export function returnRotationByType(parsedData, type, index) {
                 console.log('End Time:', endTime);
                 stages = parsedData.nodes[index].bankaraMatchSettings[0].vsStages.map(stage => new Stage(stage.name));
                 console.log('Stages:', stages.map(stage => stage.name));
+                
+                return new Rotation(mode, startTime, endTime, stages);
+                break;
+            
+            case  'bankaraSchedules-series':
+                console.log('Bankara Series Match Settings:', parsedData.nodes[index].bankaraMatchSettings);
+                console.log('Bankara Series Match Settings[1]:', parsedData.nodes[index].bankaraMatchSettings[1].vsRule);
+                console.log('Bankara Series Match Settings[1].vsStages:', parsedData.nodes[index].bankaraMatchSettings[1].vsStages);
+                mode = parsedData.nodes[index].bankaraMatchSettings[1].vsRule.name;
+                startTime = parsedData.nodes[index].startTime;
+                endTime = parsedData.nodes[index].endTime;
+                stages = parsedData.nodes[index].bankaraMatchSettings[1].vsStages.map(stage => new Stage(stage.name));
                 
                 return new Rotation(mode, startTime, endTime, stages);
                 break;
