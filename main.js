@@ -11,15 +11,13 @@ import { app, BrowserWindow } from 'electron';
 
 const dataTypes = ["regularSchedules", "bankaraSchedules", "bankaraSchedules-series", "xSchedules", "festSchedules"];
 
-const htmlElementIds = ["regular-battle-info", "bankara-battle-info", "bankara-series-battle-info", "xmatch-battle-info", "fest-battle-info"];
-
 //== Window Creation and App Lifecycle ==//
 
 //Creating a window that functions like a desktop widget to display the current schedule data from the API. This will be the main window of the app and will load the main.html file.
 const createWindow = () => {
     const win = new BrowserWindow({
-        width: 400,
-        height: 600,
+        width: 500,
+        height: 1000,
         frame: false,
         transparent: true,
         alwaysOnTop: true,
@@ -48,12 +46,7 @@ app.on('browser-window-created', (event, window) => {
                         switch(dataTypes[i]) {
                             case 'festSchedules':
                                 festData = "";
-                                
-                                window.webContents.executeJavaScript(
-                                    `const festEl = document.getElementById('${htmlElementIds[i]}'); 
-                                    if (festEl) festEl.innerText = 'No Splatfest Data Currently';`
-                                ).catch(err => console.error('executeJavaScript error:', err));
-
+                                //TODO: Implement fetching and displaying fest schedule data
                                 break;
 
                             case 'bankaraSchedules':
@@ -64,15 +57,10 @@ app.on('browser-window-created', (event, window) => {
                                     console.log('Passed Bankara Data Check!');  
                                     const currentBankaraRotation = returnRotationByType(bankaraData, dataTypes[i], 0);
                                     if(currentBankaraRotation) {
-                                        bankaraData = `Current Bankara Battle Rotation:\nMode: ${currentBankaraRotation.mode}\nStart Time: ${currentBankaraRotation.startTime}\nEnd Time: ${currentBankaraRotation.endTime}\nStages:\n${currentBankaraRotation.stages.map(stage => `- ${stage.name}`).join('\n')}`;
+                                        FillScheduleDiv(window, 'bankara-mode', 'bankara-times', 'bankara-maps', 
+                                            currentBankaraRotation.mode, currentBankaraRotation.startTime, currentBankaraRotation.endTime, currentBankaraRotation.stages);
                                     }
                                 }
-                                
-                                console.log('Bankara Data to Display:', htmlElementIds[i]);
-                                window.webContents.executeJavaScript(
-                                    `const bankaraEl = document.getElementById('${htmlElementIds[i]}'); 
-                                    if (bankaraEl) bankaraEl.innerText = ${JSON.stringify(bankaraData)};`
-                                ).catch(err => console.error('executeJavaScript error:', err));
 
                                 break;
 
@@ -83,15 +71,10 @@ app.on('browser-window-created', (event, window) => {
                                     console.log('Passed Bankara Series Data Check!');  
                                     const currentBankaraSeriesRotation = returnRotationByType(bankaraSeriesData, 'bankaraSchedules-series', 0);
                                     if(currentBankaraSeriesRotation) {
-                                        bankaraSeriesData = `Current Bankara Series Battle Rotation:\nMode: ${currentBankaraSeriesRotation.mode}\nStart Time: ${currentBankaraSeriesRotation.startTime}\nEnd Time: ${currentBankaraSeriesRotation.endTime}\nStages:\n${currentBankaraSeriesRotation.stages.map(stage => `- ${stage.name}`).join('\n')}`;
+                                        FillScheduleDiv(window, 'bankara-series-mode', 'bankara-series-times', 'bankara-series-maps', 
+                                            currentBankaraSeriesRotation.mode, currentBankaraSeriesRotation.startTime, currentBankaraSeriesRotation.endTime, currentBankaraSeriesRotation.stages);
                                     }
                                 }
-                                
-                                console.log('Bankara Series Data to Display:', htmlElementIds[i]);
-                                window.webContents.executeJavaScript(
-                                    `const bankaraSeriesEl = document.getElementById('${htmlElementIds[i]}'); 
-                                    if (bankaraSeriesEl) bankaraSeriesEl.innerText = ${JSON.stringify(bankaraSeriesData)};`
-                                ).catch(err => console.error('executeJavaScript error:', err));
 
                                 break;
                             
@@ -101,14 +84,11 @@ app.on('browser-window-created', (event, window) => {
                                 if(regularData) {
                                     const currentRegularRotation = returnRotationByType(regularData, dataTypes[i], 0);
                                     if(currentRegularRotation) {
-                                        regularData = `Current Regular Battle Rotation:\nMode: ${currentRegularRotation.mode}\nStart Time: ${currentRegularRotation.startTime}\nEnd Time: ${currentRegularRotation.endTime}\nStages:\n${currentRegularRotation.stages.map(stage => `- ${stage.name}`).join('\n')}`;
+                                        FillScheduleDiv(window, 'regular-mode', 'regular-times', 'regular-maps', 
+                                            currentRegularRotation.mode, currentRegularRotation.startTime, currentRegularRotation.endTime, currentRegularRotation.stages);
                                     }
                                 }
-                                
-                                window.webContents.executeJavaScript(
-                                    `const regularEl = document.getElementById('${htmlElementIds[i]}'); 
-                                    if (regularEl) regularEl.innerText = ${JSON.stringify(regularData)};`
-                                ).catch(err => console.error('executeJavaScript error:', err));
+
                                 break;
 
                             case 'xSchedules':
@@ -116,14 +96,10 @@ app.on('browser-window-created', (event, window) => {
                                 if(xData) {
                                     const currentXRotation = returnRotationByType(xData, dataTypes[i], 0);
                                     if(currentXRotation) {
-                                        xData = `Current X Match Battle Rotation:\nMode: ${currentXRotation.mode}\nStart Time: ${currentXRotation.startTime}\nEnd Time: ${currentXRotation.endTime}\nStages:\n${currentXRotation.stages.map(stage => `- ${stage.name}`).join('\n')}`;
+                                        FillScheduleDiv(window, 'x-mode', 'x-times', 'x-maps', 
+                                            currentXRotation.mode, currentXRotation.startTime, currentXRotation.endTime, currentXRotation.stages);
                                     }
                                 }
-                                
-                                window.webContents.executeJavaScript(
-                                    `const xEl = document.getElementById('${htmlElementIds[i]}'); 
-                                    if (xEl) xEl.innerText = ${JSON.stringify(xData)};`
-                                ).catch(err => console.error('executeJavaScript error:', err));
 
                                 break;
                             default:
@@ -165,3 +141,13 @@ app.on('window-all-closed', () => {
 });
 
 //== Window Setup End ==//
+
+function FillScheduleDiv(window, titleEl, timeEl, stagesEl, mode, startTime, endTime, stages) {
+    window.webContents.executeJavaScript(
+        `  
+            document.getElementById('${titleEl}').innerText = '${mode}';
+            document.getElementById('${timeEl}').innerText = '${startTime} - ${endTime}';
+            document.getElementById('${stagesEl}').innerText = '${stages.map(stage => `${stage.name}`).join(' / ')}';
+        `
+    ).catch(err => console.error('executeJavaScript error:', err));
+}
