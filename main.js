@@ -16,7 +16,7 @@ const dataTypes = ["regularSchedules", "bankaraSchedules", "bankaraSchedules-ser
 //Creating a window that functions like a desktop widget to display the current schedule data from the API. This will be the main window of the app and will load the main.html file.
 const createWindow = () => {
     const win = new BrowserWindow({
-        width: 500,
+        width: 480,
         height: 1000,
         frame: false,
         transparent: true,

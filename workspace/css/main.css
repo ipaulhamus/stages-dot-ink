@@ -1,7 +1,8 @@
 :root {
     --background-color: navy;
-    --primary-color: #F5F2F2;
-    --secondary-color: #FF6B6B;
+    --primary-color: whitesmoke;
+    --secondary-color: gold;
+    --shadow-color: lightblue;
 }
 
 #main-content {
@@ -11,29 +12,67 @@
     font-family: 'Courier New', Courier, monospace;
     border-radius: 8px;
     box-shadow: 10px 10px 0px rgba(0, 0, 0, 0.5);
+
+    font-weight: bold;
+}
+
+#main-content p {
+    color: var(--primary-color);
+    font-size: 1rem;
 }
 
 /* Text Styles */
 
-.title-text {
+.schedule-name {
     color: var(--secondary-color);
-    font-size: 1.5rem;
+    font-size: 1.2rem;
+    font-weight: bolder;
+}
+
+.schedule-title {
+    color: var(--primary-color);
+    font-size: 1.2rem;
     font-weight: bolder;
 }
 
 .info-text {
     color: var(--primary-color);
-    font-size: 1.3rem;
-    font-weight: bold;
+    font-size: 1rem;
+}
 
-    margin-left: 0.7rem;
+.info-text-secondary {
+    color: var(--secondary-color);
+    font-size: 1rem;
+}
+
+.text-left-buffer {
+    margin-left: 0.5rem;
 }
 
 /* Layout Styles */
-.schedule-section {
-    margin-bottom: 1rem;
-    margin-left: 0.5rem;
-    width: fit-content;
 
+.flex {
     display: flex;
+    align-items: center;
 }
+
+.flex h6 {
+    margin: 0;
+    display: inline-block;
+}
+
+.schedule-div {
+    width: fit-content;
+    
+    margin-left: 0.5rem;;
+    margin-top: 0.5rem;
+}
+
+/* Image Style */
+.schedule-img {
+    width: 3rem;
+    height: 3rem;
+
+    margin-right: 0.5rem;
+}
+

@@ -1,6 +1,6 @@
 //All functions for fetching data from the API are here. This is where we will fetch the stage list and other data from the API.
 
-//import { Rotation, Stage, Splatfest, FestTeam } from './dataTypes.js';
+import {  convertTimeString } from './utils.js';
 
 const API_URL = 'https://splatoon3.ink/data/schedules.json';
 
@@ -102,8 +102,8 @@ export function returnRotationByType(parsedData, type, index) {
             case 'regularSchedules':
 
                 mode = parsedData.nodes[index].regularMatchSetting.vsRule.name;
-                startTime = parsedData.nodes[index].startTime;
-                endTime = parsedData.nodes[index].endTime;
+                startTime = convertTimeString(parsedData.nodes[index].startTime);
+                endTime = convertTimeString(parsedData.nodes[index].endTime);
                 
                 stages = parsedData.nodes[index].regularMatchSetting.vsStages.map(stage => new Stage(stage.name));
 
@@ -116,9 +116,9 @@ export function returnRotationByType(parsedData, type, index) {
                 console.log('Bankara Match Settings[0].vsStages:', parsedData.nodes[index].bankaraMatchSettings[0].vsStages);
                 mode = parsedData.nodes[index].bankaraMatchSettings[0].vsRule.name;
                 console.log('Mode:', mode);
-                startTime = parsedData.nodes[index].startTime;
+                startTime = convertTimeString(parsedData.nodes[index].startTime);
                 console.log('Start Time:', startTime);
-                endTime = parsedData.nodes[index].endTime;
+                endTime = convertTimeString(parsedData.nodes[index].endTime);
                 console.log('End Time:', endTime);
                 stages = parsedData.nodes[index].bankaraMatchSettings[0].vsStages.map(stage => new Stage(stage.name));
                 console.log('Stages:', stages.map(stage => stage.name));
@@ -131,8 +131,8 @@ export function returnRotationByType(parsedData, type, index) {
                 console.log('Bankara Series Match Settings[1]:', parsedData.nodes[index].bankaraMatchSettings[1].vsRule);
                 console.log('Bankara Series Match Settings[1].vsStages:', parsedData.nodes[index].bankaraMatchSettings[1].vsStages);
                 mode = parsedData.nodes[index].bankaraMatchSettings[1].vsRule.name;
-                startTime = parsedData.nodes[index].startTime;
-                endTime = parsedData.nodes[index].endTime;
+                startTime = convertTimeString(parsedData.nodes[index].startTime);
+                endTime = convertTimeString(parsedData.nodes[index].endTime);
                 stages = parsedData.nodes[index].bankaraMatchSettings[1].vsStages.map(stage => new Stage(stage.name));
                 
                 return new Rotation(mode, startTime, endTime, stages);
@@ -141,8 +141,8 @@ export function returnRotationByType(parsedData, type, index) {
             case 'xSchedules':
 
                 mode = parsedData.nodes[index].xMatchSetting.vsRule.name;
-                startTime = parsedData.nodes[index].startTime;
-                endTime = parsedData.nodes[index].endTime;
+                startTime = convertTimeString(parsedData.nodes[index].startTime);
+                endTime = convertTimeString(parsedData.nodes[index].endTime);
                 
                 stages = parsedData.nodes[index].xMatchSetting.vsStages.map(stage => new Stage(stage.name));
                 
@@ -153,8 +153,8 @@ export function returnRotationByType(parsedData, type, index) {
 
                 mode = parsedData.nodes[index].festMatchSettings.vsRule.name;
                 console.log('Mode:', mode);
-                startTime = parsedData.nodes[index].startTime;
-                endTime = parsedData.nodes[index].endTime;
+                startTime = convertTimeString(parsedData.nodes[index].startTime);
+                endTime = convertTimeString(parsedData.nodes[index].endTime);
                 
                 stages = parsedData.nodes[index].festMatchSettings.vsStages.map(stage => new Stage(stage.name));
                 
