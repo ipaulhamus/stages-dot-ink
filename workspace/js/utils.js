@@ -1,5 +1,3 @@
-//Converts a time string from the API to a readable format
-//ex: 2026-01-17T00:00:00Z -> 12:00 AM (no date, just time)
 export function convertTimeString(timeString) {
     const date = new Date(timeString);
 
@@ -9,5 +7,6 @@ export function convertTimeString(timeString) {
         hour12: true
     }
 
+    //"to locale string" converts to local time zone automatically
     return date.toLocaleString('en-US', options);
 }
