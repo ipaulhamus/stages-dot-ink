@@ -8,7 +8,7 @@
  */
 import { set } from 'electron-settings';
 import { fetchScedule, parseSceduleData, returnRotationByType } from './workspace/js/api.js';
-import { ColorSettings, setWindowPosition } from './workspace/js/settings.js';
+import { ColorSettings, SizeSettings, setWindowPosition, setWindowColors  } from './workspace/js/settings.js';
 import { app, BrowserWindow } from 'electron';
 
 const dataTypes = ["regularSchedules", "bankaraSchedules", "bankaraSchedules-series", "xSchedules", "festSchedules"];
