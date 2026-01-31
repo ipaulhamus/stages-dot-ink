@@ -8,8 +8,9 @@
  */
 import { set } from 'electron-settings';
 import { fetchScedule, parseSceduleData, returnRotationByType } from './workspace/js/api.js';
-import { ColorSettings, SizeSettings, setWindowPosition, setWindowColors  } from './workspace/js/settings.js';
-import { app, BrowserWindow } from 'electron';
+import { app, BrowserWindow, ipcMain } from 'electron';
+import { ColorSettingsIndex } from './workspace/js/settingsReferences.js';
+import { saveWindowPosition, saveWindowColors, saveWindowSize } from './workspace/js/settings.js';
 
 const dataTypes = ["regularSchedules", "bankaraSchedules", "bankaraSchedules-series", "xSchedules", "festSchedules"];
 
@@ -21,37 +22,21 @@ const createWindow = () => {
         //width: 480,
         width: 480,
         height: 1000,
-        focusable: false,
+        focusable: true,
         fullscreenable: false,
         skipTaskbar: true,
         frame: false,
-        transparent: true,
+        transparent: false,
         alwaysOnTop: false,
-        resizable: false
+        resizable: true,
+        webPreferences: {
+            nodeIntegration: true,
+            contextIsolation: false
+        }
     })
 
     win.loadFile("./main.html");
     win.webContents.openDevTools();
-
-    //Renderer processes for settings changes
-    //We can listen for events from the renderer process to update settings like window position and colors
-    win.webContents.on('update-colors', (event, colorSettings) => {
-        if(!(colorSettings instanceof ColorSettings)) {
-            console.error("colorSettings is not an instance of ColorSettings.");
-            return;
-        }
-        else {
-            //Update CSS variables in the renderer process
-            win.webContents.executeJavaScript(
-                `
-                document.documentElement.style.setProperty('--background-color', '${colorSettings.backgroundColor}');
-                document.documentElement.style.setProperty('--primary-text-color', '${colorSettings.primaryText}');
-                document.documentElement.style.setProperty('--secondary-text-color', '${colorSettings.secondaryText}');
-                document.documentElement.style.setProperty('--shadow-color', '${colorSettings.shadowColor}');
-                `
-            ).catch(err => console.error("executeJavaScript error:", err));
-        }
-    });
 }
 
 // When a window finishes loading, fetch schedule in the main process and update the renderer DOM
@@ -66,6 +51,9 @@ app.on("browser-window-created", (event, window) => {
                     let bankaraSeriesData;
                     let xData;
                     let festData;
+                    
+                    //Testing updating color settings
+                    window.webContents.send('update-colors', ColorSettingsIndex.DEFAULT);
 
                    for(let i = 0; i < dataTypes.length; i++) {
 
@@ -154,6 +142,56 @@ app.whenReady().then(() => {
             createWindow();
         }
     })
+});
+
+//== IPC Event Listeners for Settings ==//
+ipcMain.on('save-window-position', (event, data) => {
+    const window = BrowserWindow.fromWebContents(event.sender);
+    
+    if (!window) {
+        console.error('Window not found');
+        return;
+    }
+    
+    if (data.x === undefined || data.y === undefined) {
+        console.error('Position data is missing x or y:', data);
+        return;
+    }
+    
+    console.log('Received position data:', data);
+    console.log('Setting window position to: x=' + data.x + ', y=' + data.y);
+    
+    saveWindowPosition(window, data.x, data.y);
+    
+    // Get current bounds and update position
+    const currentBounds = window.getBounds();
+    window.setBounds({
+        x: data.x,
+        y: data.y,
+        width: currentBounds.width,
+        height: currentBounds.height
+    })
+    
+    setTimeout(() => {
+        const bounds = window.getBounds();
+        console.log('Window position after setBounds:', bounds.x, bounds.y);
+    }, 100);
+});
+
+ipcMain.on('save-window-colors', (event, themeName) => {
+    const window = BrowserWindow.fromWebContents(event.sender);
+    const colorSettings = ColorSettingsIndex[themeName.toUpperCase()];
+    if (colorSettings) {
+        saveWindowColors(window, colorSettings);
+        window.webContents.send('update-colors', colorSettings);
+    } else {
+        console.error(`Unknown theme: ${themeName}`);
+    }
+});
+
+ipcMain.on('save-window-size', (event, sizeName) => {
+    const window = BrowserWindow.fromWebContents(event.sender);
+    saveWindowSize(window, sizeName);
 });
 
 //Ending the app's process if all windows are closed and we're on Windows or Linux

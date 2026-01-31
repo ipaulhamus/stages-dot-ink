@@ -1,30 +1,8 @@
 import settings from 'electron-settings';
-
-export const SizeSettings = {
-    SMALL: 'small',
-    MEDIUM: 'medium',
-    LARGE: 'large'
-}
-
-export class ColorSettings {
-    
-    constructor(backgroundColor, primaryText, secondaryText, shadowColor) {
-
-        if(!backgroundColor || !primaryText || !secondaryText || !shadowColor) {
-            console.error("One or more color settings are undefined.");
-            return;
-        }
-
-        this.backgroundColor = backgroundColor;
-        this.primaryText = primaryText;
-        this.secondaryText = secondaryText;
-        this.shadowColor = shadowColor;
-    }
-
-}
+import { ColorSettings, SizeSettings } from './settingsReferences.js';
 
 //Functions to edit settings
-export async function setWindowPosition(window, x, y) {
+export async function saveWindowPosition(window, x, y) {
     if(x === undefined || y === undefined) {
         console.error("X or Y position is undefined.");
         return;
@@ -47,12 +25,9 @@ export async function setWindowPosition(window, x, y) {
     }).catch((error) => {
         console.error("Error setting window Y position:", error);
     });
-
-    //Setting the window position
-    window.setPosition(x, y);
 }
 
-export async function setWindowColors(window, colorSettings) {
+export async function saveWindowColors(window, colorSettings) {
     if(!(colorSettings instanceof ColorSettings)) {
         console.error("colorSettings is not an instance of ColorSettings.");
         return;
@@ -74,12 +49,9 @@ export async function setWindowColors(window, colorSettings) {
     settings.set(`colorSettings.shadowColor`, colorSettings.shadowColor).catch((error) => {
         console.error("Error setting shadow color:", error);
     });
-
-    //Sending the color settings to the renderer process to update the UI
-    window.webContents.send('update-colors', colorSettings);
 }
 
-export async function setWindowSize(window, sizeSetting) {
+export async function saveWindowSize(window, sizeSetting) {
     switch(sizeSetting) {
         case SizeSettings.SMALL:
             break;
