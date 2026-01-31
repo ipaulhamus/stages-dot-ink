@@ -11,6 +11,7 @@ import { fetchScedule, parseSceduleData, returnRotationByType } from './workspac
 import { app, BrowserWindow, ipcMain } from 'electron';
 import { ColorSettingsIndex } from './workspace/js/settingsReferences.js';
 import { saveWindowPosition, saveWindowColors, saveWindowSize } from './workspace/js/settings.js';
+import { execSync } from 'child_process';
 
 const dataTypes = ["regularSchedules", "bankaraSchedules", "bankaraSchedules-series", "xSchedules", "festSchedules"];
 
@@ -170,7 +171,24 @@ ipcMain.on('save-window-position', (event, data) => {
         y: data.y,
         width: currentBounds.width,
         height: currentBounds.height
-    })
+    });
+    
+    //Had to ask AI to figure out why this wasn't working on Linux
+    //These commands use the package 'wmctrl' and 'xdotool' to move the windows, only usable on X11
+    try {
+        const windowId = window.getMediaSourceId();
+        execSync(`wmctrl -r "main-view" -b remove,maximized_vert,maximized_horz -e "0,${data.x},${data.y},-1,-1"`);
+        console.log('Moved window using wmctrl');
+    } catch (e) {
+        console.warn('wmctrl not available or failed, trying xdotool...');
+        try {
+            // Alternative: try xdotool
+            execSync(`xdotool getactivewindow windowmove ${data.x} ${data.y}`);
+            console.log('Moved window using xdotool');
+        } catch (e2) {
+            console.warn('xdotool also failed - GNOME may be blocking window movement');
+        }
+    }
     
     setTimeout(() => {
         const bounds = window.getBounds();
