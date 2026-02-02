@@ -5,7 +5,7 @@
     --shadow-color: lightblue;
 }
 
-#main-content {
+#body {
     background-color: var(--background-color);
     color: var(--primary-color);
     padding: 1.5rem;
@@ -16,7 +16,7 @@
     font-weight: bold;
 }
 
-#main-content p {
+#body p {
     color: var(--primary-color);
     font-size: 1rem;
 }

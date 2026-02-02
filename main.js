@@ -28,7 +28,7 @@ const createWindow = () => {
         fullscreenable: false,
         skipTaskbar: true,
         frame: false,
-        transparent: false,
+        transparent: true,
         alwaysOnTop: false,
         resizable: true,
         webPreferences: {

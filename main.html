@@ -54,6 +54,7 @@
         </script>
     </head>
     <body>
+    <div id="body">
         <div id="main-content">
             <div id="regular-battle" class="schedule-div">
                 <div class="flex">
@@ -68,7 +69,7 @@
             <div id="bankara-battle" class="schedule-div">
                 <div class="flex">
                     <img src="./workspace/images/S2_Icon_Ranked_Battle.svg" class="schedule-img">
-                    <h6 class="schedule-name">Anarchy (Open): </h6>
+                    <h6 class="schedule-name">Anarchy Open: </h6>
                     <h6 id="bankara-mode" class="schedule-title" style="margin-left: 0.3rem;"></h6>
                 </div>
                 <p id="bankara-times"></p>
@@ -77,7 +78,7 @@
             <div id="bankara-battle-series" class="schedule-div">
                 <div class="flex">
                     <img src="./workspace/images/S2_Icon_Ranked_Battle.svg" class="schedule-img">
-                    <h6 class="schedule-name">Anarchy (Series): </h6>
+                    <h6 class="schedule-name">Anarchy Series: </h6>
                     <h6 id="bankara-series-mode" class="schedule-title" style="margin-left: 0.3rem;"></h6>
                 </div>
                 <p id="bankara-series-times"></p>
@@ -107,20 +108,30 @@
             </div>
             <div id="colors">
                 <form id="color-form">
-                    <input class="radio" type="radio" name="theme" value="default" />
-                    <label for="theme">Default</label>
+                    <div class="radio-option">
+                        <input class="radio" type="radio" name="theme" value="default" />
+                        <label for="theme">Default</label>
+                    </div>
 
-                    <input class="radio" type="radio" name="theme" value="ocean" />
-                    <label for="theme">Ocean</label>
+                    <div class="radio-option">
+                        <input class="radio" type="radio" name="theme" value="ocean" />
+                        <label for="theme">Ocean</label>
+                    </div>
 
-                    <input class="radio" type="radio" name="theme" value="octo" />
-                    <label for="theme">Octo</label>
+                    <div class="radio-option">
+                        <input class="radio" type="radio" name="theme" value="octo" />
+                        <label for="theme">Octo</label>
+                    </div>
 
-                    <input class="radio" type="radio" name="theme" value="anarchy" />
-                    <label for="theme">Anarchy</label>
+                    <div class="radio-option">
+                        <input class="radio" type="radio" name="theme" value="anarchy" />
+                        <label for="theme">Anarchy</label>
+                    </div>
 
-                    <input class="radio" type="radio" name="theme" value="callie" />
-                    <label for="theme">Callie</label>
+                    <div class="radio-option">
+                        <input class="radio" type="radio" name="theme" value="callie" />
+                        <label for="theme">Callie</label>
+                    </div>
 
                     <input class="radio" type="radio" name="theme" value="marie" />
                     <label for="theme">Marie</label>
@@ -136,5 +147,6 @@
 
         <div id="error-div">
         </div>
+    </div>
     </body>
 </html>

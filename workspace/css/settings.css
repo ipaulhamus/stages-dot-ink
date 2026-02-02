@@ -1,6 +1,5 @@
 /* Settings Section Styles */
 #settings-section {
-    margin-top: 2rem;
     padding: 1rem;
     background-color: var(--background-color);
     color: var(--primary-color);
@@ -69,15 +68,30 @@
 }
 
 /* Radio Button Styles */
+
 .radio {
-    margin-right: 0.5rem;
+    margin-bottom: 0.5rem;
     cursor: pointer;
+}
+
+#color-form {
+    text-align: center;
+    align-items: center;
+    justify-content: center;
 }
 
 #color-form label {
     display: inline-block;
     margin-right: 1rem;
-    margin-bottom: 0.5rem;
+    margin-bottom: 1rem;
     cursor: pointer;
-    color: var(--primary-color);
+    color: var(--secondary-color);
+    font-weight: bold;
+}
+
+#color-form .radio {
+    accent-color: var(--secondary-color);
+    background-color: var(--primary-color);
+    width: 1.5rem;
+    height: 1.5rem;
 }
