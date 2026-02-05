@@ -14,7 +14,7 @@ export class Rotation {
     }
 }
 
-//Leaving images blank for now, but they can be added later when we have the data from the API
+//Leaving images blank for now, but they can be added later 
 export class Stage {
     constructor(name) {
         this.name = name;
@@ -22,7 +22,6 @@ export class Stage {
     }
 }
 
-//If there is a splatfest, splatoon3.ink will return a fest object
 export class Splatfest {
     constructor(name, startTime, endTime, teams) {
         this.name = name;
@@ -32,7 +31,6 @@ export class Splatfest {
     }
 }
 
-//Leaving images blank for now, but they can be added later when we have the data from the API
 export class FestTeam {
     constructor(name) {
         this.name = name;
@@ -40,7 +38,6 @@ export class FestTeam {
     }
 }
 
-//Fetches the scedule data from the API and returns it as a JSON object.
 export async function fetchScedule() {
     try{
         const response = await fetch (API_URL);

@@ -7,7 +7,7 @@
         <!-- Script Block for listening for setting change events -->
         <script>
             const { ipcRenderer } = require('electron');
-            
+
             // Listen for settings updates from main process
             ipcRenderer.on('update-colors', (event, colorSettings) => {
                 console.log('Received color update:', colorSettings);
@@ -17,9 +17,31 @@
                 document.documentElement.style.setProperty('--shadow-color', colorSettings.shadowColor);
             });
 
-            // Wait for DOM to load before attaching event listeners
+            // Wait for DOM to load before attaching event listeners for settings functions
             window.addEventListener('DOMContentLoaded', () => {
-                // Handle position form submission
+
+                const mainBlock = document.getElementById('main-content');
+                const settingsBlock = document.getElementById('settings-section');
+                
+                const settingsOpen = document.getElementById('settings-open-btn');
+                const settingsClose = document.getElementById('settings-close-btn');
+
+                if(settingsBlock && settingsOpen) {
+                    console.log("Found settings open button!");
+                    settingsOpen.addEventListener('click', (e) => {
+                        console.log("clicked button!");
+                        settingsBlock.style.display = 'block';
+                        mainBlock.style.display = 'none';
+                    });
+                }
+
+                if(settingsBlock && settingsClose) {
+                    settingsClose.addEventListener('click', (e) => {
+                        settingsBlock.style.display = 'none';
+                        mainBlock.style.display = 'block';
+                    });
+                }
+              
                 const posForm = document.getElementById('pos-form');
                 if (posForm) {
                     posForm.addEventListener('submit', (e) => {
@@ -36,7 +58,7 @@
                     });
                 }
 
-                // Handle color form radio button changes
+                
                 const colorForm = document.getElementById('color-form');
                 if (colorForm) {
                     const radioButtons = colorForm.querySelectorAll('input[type="radio"]');
@@ -93,16 +115,17 @@
                 <p id="x-times"></p>
                 <p id="x-maps" class="info-text-secondary"></p>
             </div>
-            <div id="settings-btn-container">
-                <button class="btn-med"></button>
-            </div>
+            <span id="settings-open-btn" class="clickable-text">&#9881 Settings</span>
         </div>
 
         <div id="settings-section">
+            <span id="settings-close-btn" class="clickable-text">&#10007 Close (Saves Changes)</span>
+            <br />
+            <h5 class="settings-title">Set Window Position (x, y)</h5>
             <div id="window-position">
                 <form id="pos-form" class="settings-form">
-                    <input id="x-pos" class="settings-text" type="text" />
-                    <input id="y-pos" class="settings-text" type="text" />
+                    <input id="x-pos" class="settings-text" type="text" placeholder="Horizontal Position..." />
+                    <input id="y-pos" class="settings-text" type="text" placeholder="Vertical Position..." />
                     <button id="window-pos-submit" class="btn-m">Change Position</button>
                 </form>
             </div>

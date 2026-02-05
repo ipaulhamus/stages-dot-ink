@@ -7,6 +7,8 @@
     position: relative;
     z-index: 10;
     pointer-events: auto;
+
+    display: none;
 }
 
 #window-position,

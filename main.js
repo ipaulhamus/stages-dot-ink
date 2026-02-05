@@ -55,7 +55,7 @@ app.on("browser-window-created", (event, window) => {
                     let festData;
                     
                     //Testing updating color settings
-                    window.webContents.send('update-colors', ColorSettingsIndex.DEFAULT);
+                    //window.webContents.send('update-colors', ColorSettingsIndex.DEFAULT);
 
                    for(let i = 0; i < dataTypes.length; i++) {
 
