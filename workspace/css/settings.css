@@ -25,6 +25,14 @@
 }
 
 /* Input Field Styles */
+.settings-title {
+    font-size: 1rem;
+    color: var(--primary-color);
+    text-decoration: underline;
+    text-decoration-color: var(--secondary-color);
+    text-align: center;
+}
+
 .settings-text {
     width: 100%;
     padding: 0.5rem;
@@ -77,18 +85,27 @@
 }
 
 #color-form {
-    text-align: center;
-    align-items: center;
-    justify-content: center;
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 0.75rem 0.75rem;
+    align-items: left;
+    justify-items: center;
+    width: 100%;
 }
 
 #color-form label {
     display: inline-block;
-    margin-right: 1rem;
-    margin-bottom: 1rem;
     cursor: pointer;
     color: var(--secondary-color);
     font-weight: bold;
+}
+
+.color-option {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    width: 100%;
 }
 
 #color-form .radio {
