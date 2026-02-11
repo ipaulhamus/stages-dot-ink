@@ -2,6 +2,49 @@ import settings from 'electron-settings';
 import { ColorSettings, SizeSettings } from './settingsReferences.js';
 
 //Functions to edit settings
+export async function loadWindowPosition(window) {
+    try {
+        const x = await settings.get('windowPosition.x');
+        const y = await settings.get('windowPosition.y');
+
+        if (typeof x !== 'number' || typeof y !== 'number') {
+            return null;
+        }
+
+        const currentBounds = window.getBounds();
+        window.setBounds({
+            x,
+            y,
+            width: currentBounds.width,
+            height: currentBounds.height
+        });
+
+        console.log(`Loaded window position: x=${x}, y=${y}`);
+        return { x, y };
+    } catch (error) {
+        console.error('Error loading window position:', error);
+        return null;
+    }
+}
+
+export async function loadWindowColors() {
+    try {
+        const backgroundColor = await settings.get('colorSettings.backgroundColor');
+        const primaryText = await settings.get('colorSettings.primaryText');
+        const secondaryText = await settings.get('colorSettings.secondaryText');
+        const shadowColor = await settings.get('colorSettings.shadowColor');
+
+        if (!backgroundColor || !primaryText || !secondaryText || !shadowColor) {
+            return null;
+        }
+
+        return new ColorSettings(backgroundColor, primaryText, secondaryText, shadowColor);
+    } catch (error) {
+        console.error('Error loading color settings:', error);
+        return null;
+    }
+}
+
 export async function saveWindowPosition(window, x, y) {
     if(x === undefined || y === undefined) {
         console.error("X or Y position is undefined.");
@@ -14,13 +57,13 @@ export async function saveWindowPosition(window, x, y) {
     }
 
     //Saving the position to localStorage
-    settings.set(`windowPosition.x`, x).then(() => {
+    await settings.set(`windowPosition.x`, x).then(() => {
         console.log(`Window X position set to: ${x}`);
     }).catch((error) => {
         console.error("Error setting window X position:", error);
     });
 
-    settings.set(`windowPosition.y`, y).then(() => {
+    await settings.set(`windowPosition.y`, y).then(() => {
         console.log(`Window Y position set to: ${y}`);
     }).catch((error) => {
         console.error("Error setting window Y position:", error);
@@ -34,19 +77,19 @@ export async function saveWindowColors(window, colorSettings) {
     }
 
     //Saving the color settings to localStorage
-    settings.set(`colorSettings.backgroundColor`, colorSettings.backgroundColor).catch((error) => {
+    await settings.set(`colorSettings.backgroundColor`, colorSettings.backgroundColor).catch((error) => {
         console.error("Error setting background color:", error);
     });
 
-    settings.set(`colorSettings.primaryText`, colorSettings.primaryText).catch((error) => {
+    await settings.set(`colorSettings.primaryText`, colorSettings.primaryText).catch((error) => {
         console.error("Error setting primary text color:", error);
     });
 
-    settings.set(`colorSettings.secondaryText`, colorSettings.secondaryText).catch((error) => {
+    await settings.set(`colorSettings.secondaryText`, colorSettings.secondaryText).catch((error) => {
         console.error("Error setting secondary text color:", error);
     });
 
-    settings.set(`colorSettings.shadowColor`, colorSettings.shadowColor).catch((error) => {
+    await settings.set(`colorSettings.shadowColor`, colorSettings.shadowColor).catch((error) => {
         console.error("Error setting shadow color:", error);
     });
 }
