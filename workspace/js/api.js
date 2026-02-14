@@ -109,15 +109,15 @@ export function returnRotationByType(parsedData, type, index) {
 
             case "bankaraSchedules":
                 console.log("Bankara Match Settings:", parsedData.nodes[index].bankaraMatchSettings);
-                console.log("Bankara Match Settings[0]:", parsedData.nodes[index].bankaraMatchSettings[0].vsRule);
-                console.log("Bankara Match Settings[0].vsStages:", parsedData.nodes[index].bankaraMatchSettings[0].vsStages);
-                mode = parsedData.nodes[index].bankaraMatchSettings[0].vsRule.name;
+                console.log("Bankara Match Settings[0]:", parsedData.nodes[index].bankaraMatchSettings[1].vsRule);
+                console.log("Bankara Match Settings[0].vsStages:", parsedData.nodes[index].bankaraMatchSettings[1].vsStages);
+                mode = parsedData.nodes[index].bankaraMatchSettings[1].vsRule.name;
                 console.log("Mode:", mode);
                 startTime = convertTimeString(parsedData.nodes[index].startTime);
                 console.log("Start Time:", startTime);
                 endTime = convertTimeString(parsedData.nodes[index].endTime);
                 console.log("End Time:", endTime);
-                stages = parsedData.nodes[index].bankaraMatchSettings[0].vsStages.map(stage => new Stage(stage.name));
+                stages = parsedData.nodes[index].bankaraMatchSettings[1].vsStages.map(stage => new Stage(stage.name));
                 console.log("Stages:", stages.map(stage => stage.name));
                 
                 return new Rotation(mode, startTime, endTime, stages);
@@ -125,12 +125,12 @@ export function returnRotationByType(parsedData, type, index) {
             
             case  "bankaraSchedules-series":
                 console.log("Bankara Series Match Settings:", parsedData.nodes[index].bankaraMatchSettings);
-                console.log("Bankara Series Match Settings[1]:", parsedData.nodes[index].bankaraMatchSettings[1].vsRule);
-                console.log("Bankara Series Match Settings[1].vsStages:", parsedData.nodes[index].bankaraMatchSettings[1].vsStages);
-                mode = parsedData.nodes[index].bankaraMatchSettings[1].vsRule.name;
+                console.log("Bankara Series Match Settings[1]:", parsedData.nodes[index].bankaraMatchSettings[0].vsRule);
+                console.log("Bankara Series Match Settings[1].vsStages:", parsedData.nodes[index].bankaraMatchSettings[0].vsStages);
+                mode = parsedData.nodes[index].bankaraMatchSettings[0].vsRule.name;
                 startTime = convertTimeString(parsedData.nodes[index].startTime);
                 endTime = convertTimeString(parsedData.nodes[index].endTime);
-                stages = parsedData.nodes[index].bankaraMatchSettings[1].vsStages.map(stage => new Stage(stage.name));
+                stages = parsedData.nodes[index].bankaraMatchSettings[0].vsStages.map(stage => new Stage(stage.name));
                 
                 return new Rotation(mode, startTime, endTime, stages);
                 break;

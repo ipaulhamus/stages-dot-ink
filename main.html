@@ -20,6 +20,8 @@
             // Wait for DOM to load before attaching event listeners for settings functions
             window.addEventListener('DOMContentLoaded', () => {
 
+                //Navigation Setup
+
                 const mainBlock = document.getElementById('main-content');
                 const settingsBlock = document.getElementById('settings-section');
                 
@@ -46,8 +48,14 @@
                 if (posForm) {
                     posForm.addEventListener('submit', (e) => {
                         e.preventDefault();
-                        const x = parseInt(document.getElementById('x-pos').value);
-                        const y = parseInt(document.getElementById('y-pos').value);
+
+                        const inputX = document.getElementById('x-pos');
+                        const inputY = document.getElementById('y-pos');
+
+                        const x = parseInt(inputX.value);
+                        const y = parseInt(inputY.value);
+                        
+                        inputX.value = ''; inputY.value = '';
                         
                         if (!isNaN(x) && !isNaN(y)) {
                             console.log(`Sending position: x=${x}, y=${y}`);
@@ -71,6 +79,15 @@
                             }
                         });
                     });
+                }
+
+                //Page reload retry
+                const retryBtn = document.getElementById('retry-btn');
+
+                if(retryBtn) {
+                    retryBtn.addEventListener('click', () =>{
+                        ipcRenderer.send('fetch-schedule');
+                    })
                 }
             });
         </script>
@@ -128,6 +145,8 @@
                     <input id="x-pos" class="settings-text" type="text" placeholder="Horizontal Position..." />
                     <input id="y-pos" class="settings-text" type="text" placeholder="Vertical Position..." />
                     <button id="window-pos-submit" class="btn-m">Change Position</button>
+                    <p style="text-align: center; font-size: 0.8rem;">Position will be clamped to fit if larger than screen size</p>
+                    <p style="text-align: center; font-size: 0.8rem; margin-top: -0.5rem;">Only valid numbers are accepted</p>
                 </form>
             </div>
             <hr class="page-divider" />
@@ -171,6 +190,12 @@
         </div>
 
         <div id="error-div">
+            <h4 class="error-text">Failed to Fetch Scedule!</h4>
+            <h5 class="error-text">Please Try Again Or Restart The App</h5>
+            <br />
+            <button onclick="
+                document.getElementById('error-div').style.visibility = 'none';
+                document.getElementById('main-content').style.visibility = 'block';" id="retry-btn" class="btn-m">Retry &#x27F3</button>
         </div>
     </div>
     </body>

@@ -21,6 +21,10 @@
     font-size: 1rem;
 }
 
+#error-div {
+    display: none;
+}
+
 /* Button/Interactable Objects */
 .clickable-text {
     font-weight: bolder;
