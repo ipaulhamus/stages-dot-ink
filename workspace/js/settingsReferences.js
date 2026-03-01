@@ -14,24 +14,49 @@ export class ColorSettings {
     }
 }
 
+//Object to store window scaling data
 export class SizeSettings {
-    constructor(xPos, yPos) {
+    constructor(windowX, windowY, windowPadding, borderWidth, borderRadius, pFontSize, titleFontSize, clickableFontSize, textLeftBuffer, sceduleMarginLeft, sceduleMarginTop, sceduleImgWidth, sceduleImgHeight, scheduleImgMargin) {
+        
+        this.windowX = windowX;
+        this.windowY = windowY;
 
-        if(!xPos || !yPos) {
-            console.error("One or more sizing settings are undefined");
-            return;
-        }
+        this.windowPadding = windowPadding;
+        this.borderWidth = borderWidth;
+        this.borderRadius = borderRadius;
+        this.pFontSize = pFontSize;
+        this.titleFontSize = titleFontSize;
+        this.clickableFontSize = clickableFontSize;
+        this.textLeftBuffer = textLeftBuffer;
+        this.sceduleMarginLeft = sceduleMarginLeft;
+        this.scheduleMarginTop = sceduleMarginTop;
+        this.sceduleImgWidth = sceduleImgWidth;
+        this.sceduleImgHeight = sceduleImgHeight;
+        this.scheduleImgMargin = scheduleImgMargin;
+    }
+}
 
-        this.xPos = xPos;
-        this.yPos = yPos;
+export class XYSizes {
+    constructor(x, y) {
+        this.x = x;
+        this.y = y;
     }
 }
 
 //fake "enums" that are passed into the settings functions
 export const SizeSettingsIndex = {
-    //SMALL: new SizeSettings()
-    //MEDIUM: new SizeSettings()
-    //LARGE: new SizeSettings()
+    SMALL: new SizeSettings(
+        240, 315, 0.75, 0.075, 5, 0.5, 0.6, 0.5, 0.25, 0.25, 0.25, 1.5, 1.5, 0.25
+    ),
+    MEDIUM: new SizeSettings(
+        360, 472.5, 1.125, 0.1125, 7.5, 0.75, 0.9, 0.75, 0.375, 0.375, 0.375, 2.25, 2.25, 0.375
+    ),
+    LARGE: new SizeSettings(
+        480, 630, 1.5, 0.15, 10, 1, 1.2, 1, 0.5, 0.5, 0.5, 3, 3, 0.5
+    ),
+    EX_LARGE: new SizeSettings(
+        720, 945, 2.25, 0.225, 15, 1.5, 1.8, 1.5, 0.75, 0.75, 0.75, 4.5, 4.5, 0.75
+    )
 }
 
 export const ColorSettingsIndex = {

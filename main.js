@@ -2,36 +2,38 @@
  * Viewing console logs:
  * - Main process logs (console.log in this file) appear in the terminal that launched the Electron app.
  * - Renderer logs (console.log inside the loaded page) appear in the renderer DevTools:
- *     - Open DevTools from the app menu or use the keyboard shortcut (Ctrl+Shift+I on Windows/Linux, Cmd+Option+I on macOS).
+
+*     - Open DevTools from the app menu or use the keyboard shortcut (Ctrl+Shift+I on Windows/Linux, Cmd+Option+I on macOS).
  *     - Programmatically open DevTools for the created window: win.webContents.openDevTools().
  * - To forward renderer logs to the terminal during development, run Electron with logging enabled (e.g. set ELECTRON_ENABLE_LOGGING=1 or use --enable-logging).
  */
 
 import { fetchScedule, parseSceduleData, returnRotationByType } from './workspace/js/api.js';
 import { app, BrowserWindow, ipcMain, screen } from 'electron';
-import { ColorSettingsIndex } from './workspace/js/settingsReferences.js';
-import { saveWindowPosition, saveWindowColors, saveWindowSize, loadWindowColors, loadWindowPosition } from './workspace/js/settings.js';
+import { ColorSettingsIndex, SizeSettings, SizeSettingsIndex } from './workspace/js/settingsReferences.js';
+import { saveWindowPosition, saveWindowColors, saveWindowSize, loadWindowColors, loadWindowPosition, loadWindowSize } from './workspace/js/settings.js';
 import { execSync } from 'child_process';
 import { Console } from 'console';
 import { platform } from 'os';
+import { defaultMaxListeners } from 'events';
 
 const dataTypes = ["regularSchedules", "bankaraSchedules", "bankaraSchedules-series", "xSchedules", "festSchedules"];
 
 //== Window Creation and App Lifecycle ==//
 
 //Creating a window that functions like a desktop widget to display the current schedule data from the API. This will be the main window of the app and will load the main.html file.
-const createWindow = () => {
+const createWindow = (sizeSettings = SizeSettingsIndex.MEDIUM) => {
+    const size = sizeSettings instanceof SizeSettings ? sizeSettings : SizeSettingsIndex.MEDIUM;
     const win = new BrowserWindow({
-        //width: 480,
-        width: 480,
-        height: 1000,
+        width: Math.round(size.windowX),
+        height: Math.round(size.windowY),
         focusable: true,
         fullscreenable: false,
         skipTaskbar: true,
         frame: false,
         transparent: true,
         alwaysOnTop: false,
-        resizable: true,
+        resizable: false,
         webPreferences: {
             nodeIntegration: true,
             contextIsolation: false
@@ -39,7 +41,6 @@ const createWindow = () => {
     })
 
     win.loadFile("./main.html");
-    //win.webContents.openDevTools();
 }
 
 // When a window finishes loading, fetch schedule in the main process and update the renderer DOM
@@ -51,6 +52,12 @@ app.on("browser-window-created", (event, window) => {
 
         const savedColors = await loadWindowColors();
         window.webContents.send('update-colors', savedColors ?? ColorSettingsIndex.DEFAULT);
+
+        const savedSize = await loadWindowSize();
+
+        applyWindowSize(window, savedSize ?? SizeSettingsIndex.MEDIUM);
+
+        window.webContents.send('update-size', savedSize ?? SizeSettingsIndex.MEDIUM);
         //=========================================//
         
         handleFetchSchedule(window);
@@ -62,17 +69,29 @@ app.on("browser-window-created", (event, window) => {
     });
 });
 
-app.whenReady().then(() => { 
-    createWindow();
+app.whenReady().then(async () => { 
+    const savedSize = await loadWindowSize();
+    createWindow(savedSize ?? SizeSettingsIndex.MEDIUM);
 
     app.on("activate", () => {
         if(BrowserWindow.getAllWindows().length === 0) {
-            createWindow();
+            createWindow(savedSize ?? SizeSettingsIndex.MEDIUM);
         }
     })
 });
 
 //== IPC Event Listeners for Settings ==//
+
+ipcMain.on('close-app', (event) => {
+
+    const window = BrowserWindow.fromWebContents(event.sender);
+    if(!window) {
+        console.error('Window not found for close-app');
+        return;
+    }
+
+    app.quit();
+});
 
 ipcMain.on('fetch-schedule', (event) => {
     const window = BrowserWindow.fromWebContents(event.sender);
@@ -139,6 +158,7 @@ ipcMain.on('save-window-position', (event, data) => {
 });
 
 ipcMain.on('save-window-colors', (event, themeName) => {
+
     const window = BrowserWindow.fromWebContents(event.sender);
     const colorSettings = ColorSettingsIndex[themeName.toUpperCase()];
     if (colorSettings) {
@@ -150,8 +170,20 @@ ipcMain.on('save-window-colors', (event, themeName) => {
 });
 
 ipcMain.on('save-window-size', (event, sizeName) => {
+
     const window = BrowserWindow.fromWebContents(event.sender);
+    const sizeObject = SizeSettingsIndex[sizeName.toUpperCase()];
+    
+    if(!(sizeObject instanceof SizeSettings)) {
+        console.log('The given size settings were not in the proper format, disregarding and not editing the window size.');
+        return;
+    }
+
     saveWindowSize(window, sizeName);
+
+    applyWindowSize(window, sizeObject);
+
+    window.webContents.send('update-size', sizeObject);
 });
 
 //Ending the app's process if all windows are closed and we're on Windows or Linux
@@ -167,6 +199,7 @@ app.on("window-all-closed", () => {
 //== Window Setup End ==//
 
 function handleFetchSchedule(window) {
+
     fetchScedule()
         .then(data => {
             if (data) {
@@ -212,6 +245,21 @@ function FillScheduleDiv(window, titleEl, timeEl, stagesEl, mode, startTime, end
             document.getElementById("${stagesEl}").innerText = "${stages.map(stage => `${stage.name}`).join(' / ')}";
         `
     ).catch(err => console.error('executeJavaScript error:', err));
+}
+
+function applyWindowSize(window, sizeObject) {
+
+    if(!(sizeObject instanceof SizeSettings)) {
+        return;
+    }
+
+    const currentBounds = window.getBounds();
+    window.setBounds({
+        x: currentBounds.x,
+        y: currentBounds.y,
+        width: Math.round(sizeObject.windowX),
+        height: Math.round(sizeObject.windowY)
+    });
 }
 
 function FillScheduleData(window, dataTypes, data, bankaraData, bankaraSeriesData, regularData, xData, festData) {

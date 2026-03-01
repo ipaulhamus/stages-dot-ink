@@ -1,5 +1,6 @@
 import settings from 'electron-settings';
-import { ColorSettings, SizeSettings } from './settingsReferences.js';
+import { ColorSettings, SizeSettings, SizeSettingsIndex } from './settingsReferences.js';
+import { error } from 'console';
 
 //Functions to edit settings
 export async function loadWindowPosition(window) {
@@ -27,7 +28,29 @@ export async function loadWindowPosition(window) {
     }
 }
 
+export async function loadWindowSize() {
+    try{
+        const savedKey = await settings.get('sizeSettings.selected');
+
+        if(typeof savedKey === 'string' && SizeSettingsIndex[savedKey.toUpperCase()]) {
+            return SizeSettingsIndex[savedKey.toUpperCase()];
+        }
+
+        const legacySize = await settings.get('sizeSettings.settingsObject');
+        if(legacySize && typeof legacySize === 'object') {
+            return normalizeLegacySizeSettings(legacySize);
+        }
+
+        return null;
+    }
+    catch(error) {
+        console.error('Error loading window saved window size: ', error);
+        return null;
+    }
+}
+
 export async function loadWindowColors() {
+
     try {
         const backgroundColor = await settings.get('colorSettings.backgroundColor');
         const primaryText = await settings.get('colorSettings.primaryText');
@@ -46,6 +69,7 @@ export async function loadWindowColors() {
 }
 
 export async function saveWindowPosition(window, x, y) {
+
     if(x === undefined || y === undefined) {
         console.error("X or Y position is undefined.");
         return;
@@ -71,6 +95,7 @@ export async function saveWindowPosition(window, x, y) {
 }
 
 export async function saveWindowColors(window, colorSettings) {
+
     if(!(colorSettings instanceof ColorSettings)) {
         console.error("colorSettings is not an instance of ColorSettings.");
         return;
@@ -95,15 +120,47 @@ export async function saveWindowColors(window, colorSettings) {
 }
 
 export async function saveWindowSize(window, sizeSetting) {
-    switch(sizeSetting) {
-        case SizeSettings.SMALL:
-            break;
-        case SizeSettings.MEDIUM:
-            break;
-        case SizeSettings.LARGE:
-            break;
-        default:
+    if(typeof sizeSetting === 'string') {
+        const sizeKey = sizeSetting.toUpperCase();
+        if(!SizeSettingsIndex[sizeKey]) {
             console.error("Unknown size setting:", sizeSetting);
             return;
+        }
+
+        await settings.set(`sizeSettings.selected`, sizeKey).catch((error) =>{
+            console.error("Error saving the sizing settings: ", error);
+        });
+        return;
     }
+
+    if(!(sizeSetting instanceof SizeSettings)) {
+        console.error("Size setting is not a valid SizeSettings instance.");
+        return;
+    }
+
+    await settings.set(`sizeSettings.settingsObject`, sizeSetting).catch((error) =>{
+        console.error("Error saving the sizing settings: ", error);
+    });
+}
+
+function normalizeLegacySizeSettings(legacySize) {
+    const needsRemConversion = Number(legacySize.sceduleImgWidth) > 10 || Number(legacySize.windowPadding) > 6;
+    const rem = (value) => (needsRemConversion ? Number(value) / 16 : Number(value));
+
+    return new SizeSettings(
+        Number(legacySize.windowX),
+        Number(legacySize.windowY),
+        rem(legacySize.windowPadding),
+        rem(legacySize.borderWidth),
+        Number(legacySize.borderRadius),
+        rem(legacySize.pFontSize),
+        rem(legacySize.titleFontSize),
+        rem(legacySize.clickableFontSize),
+        rem(legacySize.textLeftBuffer),
+        rem(legacySize.sceduleMarginLeft),
+        rem(legacySize.scheduleMarginTop),
+        rem(legacySize.sceduleImgWidth),
+        rem(legacySize.sceduleImgHeight),
+        rem(legacySize.scheduleImgMargin)
+    );
 }

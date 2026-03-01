@@ -11,10 +11,70 @@
             // Listen for settings updates from main process
             ipcRenderer.on('update-colors', (event, colorSettings) => {
                 console.log('Received color update:', colorSettings);
+
+                if(!colorSettings) {
+                    console.error('Color settings missing for update-colors');
+                }
+
                 document.documentElement.style.setProperty('--background-color', colorSettings.backgroundColor);
                 document.documentElement.style.setProperty('--primary-color', colorSettings.primaryText);
                 document.documentElement.style.setProperty('--secondary-color', colorSettings.secondaryText);
                 document.documentElement.style.setProperty('--shadow-color', colorSettings.shadowColor);
+            });
+
+            ipcRenderer.on('update-size', (event, sizeSettings) => {
+                console.log('Recieved css size update:', sizeSettings);
+
+                if (!sizeSettings) {
+                    console.error('Size settings missing for update-size');
+                    return;
+                }
+
+                const scale = Number(sizeSettings.pFontSize) || 1;
+                const rem = (value) => `${Number(value) * scale}rem`;
+                const px = (value) => `${Number(value) * scale}px`;
+
+                // Main document sizing
+                document.documentElement.style.setProperty('--window-padding', `${sizeSettings.windowPadding}rem`);
+                document.documentElement.style.setProperty('--border-width', `${sizeSettings.borderWidth}rem`);
+                document.documentElement.style.setProperty('--border-radius', `${sizeSettings.borderRadius}px`);
+
+                document.documentElement.style.setProperty('--p-font-size', `${sizeSettings.pFontSize}rem`);
+                document.documentElement.style.setProperty('--title-font-size', `${sizeSettings.titleFontSize}rem`);
+                document.documentElement.style.setProperty('--clickable-font-size', `${sizeSettings.clickableFontSize}rem`);
+
+                document.documentElement.style.setProperty('--text-left-buffer', `${sizeSettings.textLeftBuffer}rem`);
+                document.documentElement.style.setProperty('--schedule-margin-left', `${sizeSettings.sceduleMarginLeft}rem`);
+                document.documentElement.style.setProperty('--schedule-margin-top', `${sizeSettings.scheduleMarginTop}rem`);
+
+                document.documentElement.style.setProperty('--schedule-img-width', `${sizeSettings.sceduleImgWidth}rem`);
+                document.documentElement.style.setProperty('--schedule-img-height', `${sizeSettings.sceduleImgHeight}rem`);
+                document.documentElement.style.setProperty('--schedule-img-margin-right', `${sizeSettings.scheduleImgMargin}rem`);
+
+                // Settings form sizing
+                document.documentElement.style.setProperty('--settings-section-padding', rem(1));
+                document.documentElement.style.setProperty('--settings-border-radius', px(8));
+                document.documentElement.style.setProperty('--settings-section-gap', rem(1.5));
+                document.documentElement.style.setProperty('--settings-form-gap', rem(0.5));
+
+                document.documentElement.style.setProperty('--settings-title-size', rem(1));
+                document.documentElement.style.setProperty('--settings-input-padding', rem(0.5));
+                document.documentElement.style.setProperty('--settings-input-margin', rem(0.25));
+                document.documentElement.style.setProperty('--settings-input-border-width', `${sizeSettings.borderWidth}rem`);
+                document.documentElement.style.setProperty('--settings-input-radius', px(4));
+                document.documentElement.style.setProperty('--settings-input-font-size', rem(1));
+
+                document.documentElement.style.setProperty('--settings-btn-padding-y', rem(0.5));
+                document.documentElement.style.setProperty('--settings-btn-padding-x', rem(1));
+                document.documentElement.style.setProperty('--settings-btn-margin-top', rem(0.5));
+                document.documentElement.style.setProperty('--settings-btn-radius', px(4));
+                document.documentElement.style.setProperty('--settings-btn-font-size', rem(0.9));
+
+                document.documentElement.style.setProperty('--settings-radio-margin-bottom', rem(0.5));
+                document.documentElement.style.setProperty('--settings-color-form-gap-y', rem(0.75));
+                document.documentElement.style.setProperty('--settings-color-form-gap-x', rem(0.75));
+                document.documentElement.style.setProperty('--settings-color-option-gap', rem(0.5));
+                document.documentElement.style.setProperty('--settings-radio-size', rem(1.5));
             });
 
             // Wait for DOM to load before attaching event listeners for settings functions
@@ -66,7 +126,6 @@
                     });
                 }
 
-                
                 const colorForm = document.getElementById('color-form');
                 if (colorForm) {
                     const radioButtons = colorForm.querySelectorAll('input[type="radio"]');
@@ -81,12 +140,35 @@
                     });
                 }
 
+                const sizeForm = document.getElementById('size-form');
+                if(sizeForm) {
+                    const sizeFormRadio = sizeForm.querySelectorAll('input[type="radio"]');
+                    sizeFormRadio.forEach(radio => {
+                        radio.addEventListener('change', (e) => {
+                            if(e.target.checked) {
+                                const sizeName = e.target.value;
+                                console.log(`Sending size value: ${sizeName}`);
+                                ipcRenderer.send('save-window-size', sizeName);
+                            }
+                        })
+                    });
+                }
+
                 //Page reload retry
                 const retryBtn = document.getElementById('retry-btn');
 
                 if(retryBtn) {
                     retryBtn.addEventListener('click', () =>{
                         ipcRenderer.send('fetch-schedule');
+                    })
+                }
+                
+                //Exit Button
+                const appCloseBtn = document.getElementById('app-close-btn');
+
+                if(appCloseBtn) {
+                    appCloseBtn.addEventListener('click', () => {
+                        ipcRenderer.send('close-app');
                     })
                 }
             });
@@ -152,41 +234,64 @@
             <hr class="page-divider" />
             <p class="settings-title">Select Theme</p>
             <div id="colors">
-                <form id="color-form">
-                    <div class="color-option">
+                <form id="color-form" class="setting-form">
+                    <div class="setting-option">
                         <input class="radio" type="radio" name="theme" value="default" />
                         <label for="theme">Normal</label>
                     </div>
                 
-                    <div class="color-option">
+                    <div class="setting-option">
                         <input class="radio" type="radio" name="theme" value="ocean" />
                         <label for="theme">Ocean</label>
                     </div>
         
-                    <div class="color-option">
+                    <div class="setting-option">
                         <input class="radio" type="radio" name="theme" value="octo" />
                         <label for="theme">Ranked</label>
                     </div>
                 
-                    <div class="color-option">
+                    <div class="setting-option">
                         <input class="radio" type="radio" name="theme" value="callie" />
                         <label for="theme">Callie</label>
                     </div>
                     
-                    <div class="color-option">
+                    <div class="setting-option">
                         <input class="radio" type="radio" name="theme" value="marie" />
                         <label for="theme">Marie</label>
                     </div>
  
-                    <div class="color-option">
+                    <div class="setting-option">
                         <input class="radio" type="radio" name="theme" value="sendou" />
                         <label for="theme">Sendou</label>
                     </div>
                 </form>
             </div>
             <hr class="page-divider" />
-            <div id="window-size">
+            <div id="sizes">
+                <form id="size-form" class="setting-form">
+                    <div class="setting-option">
+                        <input class="radio" type="radio" name="theme" value="SMALL" />
+                        <label for="theme">Normal</label>
+                    </div>
+                
+                    <div class="setting-option">
+                        <input class="radio" type="radio" name="theme" value="MEDIUM" />
+                        <label for="theme">Ocean</label>
+                    </div>
+        
+                    <div class="setting-option">
+                        <input class="radio" type="radio" name="theme" value="LARGE" />
+                        <label for="theme">Ranked</label>
+                    </div>
+                
+                    <div class="setting-option">
+                        <input class="radio" type="radio" name="theme" value="EX_LARGE" />
+                        <label for="theme">Callie</label>
+                    </div>
+                </form>
             </div>
+
+            <span id="app-close-btn" class="clickable-text" style="color: red; text-shadow: black;">&#9940; Close App</span>
         </div>
 
         <div id="error-div">
