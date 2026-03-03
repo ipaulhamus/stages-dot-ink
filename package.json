@@ -13,17 +13,19 @@
   "build": {
     "appId": "Stages.Ink",
     "win": {
-      "target": "nsis"
+      "target": "nsis",
+      "icon": "Stages-Dot-Ink-Icon.ico"
+    },
+    "linux": {
+      "category": "Utility"
     },
     "nsis": {
-      "include": "build/installer.nsh",
-      "oneClick": false,
-      "allowToChangeInstallationDirectory": true,
+      "oneClick": true,
+      "allowToChangeInstallationDirectory": false,
       "uninstallDisplayName": "Stages.ink",
       "installerIcon": "Stages-Dot-Ink-Icon.ico",
       "uninstallerIcon": "Stages-Dot-Ink-Icon.ico"
-    },
-    "icon": "Stages-Dot-Ink-Icon.ico"
+    }
   },
   "author": "GalaxyKirby",
   "license": "MIT",

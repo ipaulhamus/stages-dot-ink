@@ -19,10 +19,7 @@ import { platform } from 'os';
 import { defaultMaxListeners } from 'events';
 
 const dataTypes = ["regularSchedules", "bankaraSchedules", "bankaraSchedules-series", "xSchedules", "festSchedules"];
-const autoLauncher = new AutoLaunch({
-    name: 'Stages.Ink',
-    path: process.execPath
-});
+let autoLauncher = null;
 
 //== Window Creation and App Lifecycle ==//
 
@@ -81,6 +78,13 @@ app.whenReady().then(async () => {
     const savedSize = await loadWindowSize();
     const savedAutoLaunch = await loadAutoLaunchSetting();
     createWindow(savedSize ?? SizeSettingsIndex.MEDIUM);
+
+    if (process.platform === 'linux') {
+        autoLauncher = new AutoLaunch({
+            name: 'Stages.Ink',
+            path: process.execPath
+        });
+    }
 
     if (typeof savedAutoLaunch === 'boolean') {
         await applyAutoLaunchSetting(savedAutoLaunch);
@@ -284,11 +288,18 @@ function applyWindowSize(window, sizeObject) {
 
 async function applyAutoLaunchSetting(enabled) {
     try {
-        const isEnabled = await autoLauncher.isEnabled().catch(() => false);
-        if (enabled && !isEnabled) {
-            await autoLauncher.enable();
-        } else if (!enabled && isEnabled) {
-            await autoLauncher.disable();
+        if (process.platform === 'win32' || process.platform === 'darwin') {
+            app.setLoginItemSettings({ openAtLogin: enabled });
+            return;
+        }
+
+        if (process.platform === 'linux' && autoLauncher) {
+            const isEnabled = await autoLauncher.isEnabled().catch(() => false);
+            if (enabled && !isEnabled) {
+                await autoLauncher.enable();
+            } else if (!enabled && isEnabled) {
+                await autoLauncher.disable();
+            }
         }
     } catch (error) {
         console.error('Failed to update auto launch setting:', error);
