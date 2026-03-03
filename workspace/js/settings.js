@@ -143,6 +143,30 @@ export async function saveWindowSize(window, sizeSetting) {
     });
 }
 
+export async function loadAutoLaunchSetting() {
+    try {
+        const enabled = await settings.get('app.autoLaunch');
+        if (typeof enabled !== 'boolean') {
+            return null;
+        }
+        return enabled;
+    } catch (error) {
+        console.error('Error loading auto launch setting:', error);
+        return null;
+    }
+}
+
+export async function saveAutoLaunchSetting(enabled) {
+    if (typeof enabled !== 'boolean') {
+        console.error('Auto launch setting must be a boolean.');
+        return;
+    }
+
+    await settings.set('app.autoLaunch', enabled).catch((error) => {
+        console.error('Error saving auto launch setting:', error);
+    });
+}
+
 function normalizeLegacySizeSettings(legacySize) {
     const needsRemConversion = Number(legacySize.sceduleImgWidth) > 10 || Number(legacySize.windowPadding) > 6;
     const rem = (value) => (needsRemConversion ? Number(value) / 16 : Number(value));

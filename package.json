@@ -7,7 +7,23 @@
     "start": "electron-forge start",
     "test": "echo \"Error: no test specified\" && exit 1",
     "package": "electron-forge package",
-    "make": "electron-forge make"
+    "make": "electron-forge make",
+    "build": "electron-builder"
+  },
+  "build": {
+    "appId": "Stages.Ink",
+    "win": {
+      "target": "nsis"
+    },
+    "nsis": {
+      "include": "build/installer.nsh",
+      "oneClick": false,
+      "allowToChangeInstallationDirectory": true,
+      "uninstallDisplayName": "Stages.ink",
+      "installerIcon": "Stages-Dot-Ink-Icon.ico",
+      "uninstallerIcon": "Stages-Dot-Ink-Icon.ico"
+    },
+    "icon": "Stages-Dot-Ink-Icon.ico"
   },
   "author": "GalaxyKirby",
   "license": "MIT",
@@ -20,9 +36,12 @@
     "@electron-forge/plugin-auto-unpack-natives": "^7.11.1",
     "@electron-forge/plugin-fuses": "^7.11.1",
     "@electron/fuses": "^1.8.0",
-    "electron": "^39.2.7"
+    "auto-launch": "^5.0.6",
+    "electron": "^39.2.7",
+    "electron-builder": "^26.8.1"
   },
   "dependencies": {
+    "auto-launch": "^5.0.6",
     "electron-settings": "^4.0.4",
     "electron-squirrel-startup": "^1.0.1"
   },

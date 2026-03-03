@@ -11,13 +11,18 @@
 import { fetchScedule, parseSceduleData, returnRotationByType } from './workspace/js/api.js';
 import { app, BrowserWindow, ipcMain, screen } from 'electron';
 import { ColorSettingsIndex, SizeSettings, SizeSettingsIndex } from './workspace/js/settingsReferences.js';
-import { saveWindowPosition, saveWindowColors, saveWindowSize, loadWindowColors, loadWindowPosition, loadWindowSize } from './workspace/js/settings.js';
+import { saveWindowPosition, saveWindowColors, saveWindowSize, loadWindowColors, loadWindowPosition, loadWindowSize, loadAutoLaunchSetting, saveAutoLaunchSetting } from './workspace/js/settings.js';
+import AutoLaunch from 'auto-launch';
 import { execSync } from 'child_process';
 import { Console } from 'console';
 import { platform } from 'os';
 import { defaultMaxListeners } from 'events';
 
 const dataTypes = ["regularSchedules", "bankaraSchedules", "bankaraSchedules-series", "xSchedules", "festSchedules"];
+const autoLauncher = new AutoLaunch({
+    name: 'Stages.Ink',
+    path: process.execPath
+});
 
 //== Window Creation and App Lifecycle ==//
 
@@ -59,6 +64,9 @@ app.on("browser-window-created", (event, window) => {
 
         window.webContents.send('update-size', savedSize ?? SizeSettingsIndex.MEDIUM);
         //=========================================//
+
+        const savedAutoLaunch = await loadAutoLaunchSetting();
+        window.webContents.send('update-auto-launch', savedAutoLaunch ?? false);
         
         handleFetchSchedule(window);
 
@@ -71,7 +79,12 @@ app.on("browser-window-created", (event, window) => {
 
 app.whenReady().then(async () => { 
     const savedSize = await loadWindowSize();
+    const savedAutoLaunch = await loadAutoLaunchSetting();
     createWindow(savedSize ?? SizeSettingsIndex.MEDIUM);
+
+    if (typeof savedAutoLaunch === 'boolean') {
+        await applyAutoLaunchSetting(savedAutoLaunch);
+    }
 
     app.on("activate", () => {
         if(BrowserWindow.getAllWindows().length === 0) {
@@ -186,6 +199,13 @@ ipcMain.on('save-window-size', (event, sizeName) => {
     window.webContents.send('update-size', sizeObject);
 });
 
+ipcMain.on('set-auto-launch', async (event, enabled) => {
+    const normalized = Boolean(enabled);
+    await saveAutoLaunchSetting(normalized);
+    await applyAutoLaunchSetting(normalized);
+    event.sender.send('update-auto-launch', normalized);
+});
+
 //Ending the app's process if all windows are closed and we're on Windows or Linux
 app.on("window-all-closed", () => {
     if(process.platform !== "darwin") {
@@ -260,6 +280,19 @@ function applyWindowSize(window, sizeObject) {
         width: Math.round(sizeObject.windowX),
         height: Math.round(sizeObject.windowY)
     });
+}
+
+async function applyAutoLaunchSetting(enabled) {
+    try {
+        const isEnabled = await autoLauncher.isEnabled().catch(() => false);
+        if (enabled && !isEnabled) {
+            await autoLauncher.enable();
+        } else if (!enabled && isEnabled) {
+            await autoLauncher.disable();
+        }
+    } catch (error) {
+        console.error('Failed to update auto launch setting:', error);
+    }
 }
 
 function FillScheduleData(window, dataTypes, data, bankaraData, bankaraSeriesData, regularData, xData, festData) {

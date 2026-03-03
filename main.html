@@ -77,6 +77,13 @@
                 document.documentElement.style.setProperty('--settings-radio-size', rem(1.5));
             });
 
+            ipcRenderer.on('update-auto-launch', (event, enabled) => {
+                const toggle = document.getElementById('auto-launch-toggle');
+                if (toggle) {
+                    toggle.checked = Boolean(enabled);
+                }
+            });
+
             // Wait for DOM to load before attaching event listeners for settings functions
             window.addEventListener('DOMContentLoaded', () => {
 
@@ -151,6 +158,13 @@
                                 ipcRenderer.send('save-window-size', sizeName);
                             }
                         })
+                    });
+                }
+
+                const autoLaunchToggle = document.getElementById('auto-launch-toggle');
+                if (autoLaunchToggle) {
+                    autoLaunchToggle.addEventListener('change', (e) => {
+                        ipcRenderer.send('set-auto-launch', e.target.checked);
                     });
                 }
 
@@ -290,6 +304,13 @@
                         <label for="theme">Giant</label>
                     </div>
                 </form>
+            </div>
+
+            <hr class="page-divider" />
+            <p class="settings-title">Startup</p>
+            <div class="settings-toggle">
+                <input id="auto-launch-toggle" class="radio" type="checkbox" />
+                <label for="auto-launch-toggle">Open on startup</label>
             </div>
 
             <span id="app-close-btn" class="clickable-text" style="color: red; text-shadow: black;">&#9940; Close App</span>
