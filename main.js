@@ -12,7 +12,6 @@ import { fetchScedule, parseSceduleData, returnRotationByType } from './workspac
 import { app, BrowserWindow, ipcMain, screen } from 'electron';
 import { ColorSettingsIndex, SizeSettings, SizeSettingsIndex } from './workspace/js/settingsReferences.js';
 import { saveWindowPosition, saveWindowColors, saveWindowSize, loadWindowColors, loadWindowPosition, loadWindowSize, loadAutoLaunchSetting, saveAutoLaunchSetting } from './workspace/js/settings.js';
-import AutoLaunch from 'auto-launch';
 import { execSync } from 'child_process';
 import { Console } from 'console';
 import { platform } from 'os';
@@ -20,6 +19,28 @@ import { defaultMaxListeners } from 'events';
 
 const dataTypes = ["regularSchedules", "bankaraSchedules", "bankaraSchedules-series", "xSchedules", "festSchedules"];
 let autoLauncher = null;
+
+async function getAutoLauncher() {
+    if (autoLauncher) {
+        return autoLauncher;
+    }
+
+    if (process.platform !== 'linux') {
+        return null;
+    }
+
+    try {
+        const { default: AutoLaunch } = await import('auto-launch');
+        autoLauncher = new AutoLaunch({
+            name: 'Stages.Ink',
+            path: process.execPath
+        });
+        return autoLauncher;
+    } catch (error) {
+        console.warn('Auto-launch not available on this system:', error);
+        return null;
+    }
+}
 
 //== Window Creation and App Lifecycle ==//
 
@@ -80,10 +101,7 @@ app.whenReady().then(async () => {
     createWindow(savedSize ?? SizeSettingsIndex.MEDIUM);
 
     if (process.platform === 'linux') {
-        autoLauncher = new AutoLaunch({
-            name: 'Stages.Ink',
-            path: process.execPath
-        });
+        await getAutoLauncher();
     }
 
     if (typeof savedAutoLaunch === 'boolean') {
@@ -293,12 +311,16 @@ async function applyAutoLaunchSetting(enabled) {
             return;
         }
 
-        if (process.platform === 'linux' && autoLauncher) {
-            const isEnabled = await autoLauncher.isEnabled().catch(() => false);
+        if (process.platform === 'linux') {
+            const launcher = autoLauncher ?? await getAutoLauncher();
+            if (!launcher) {
+                return;
+            }
+            const isEnabled = await launcher.isEnabled().catch(() => false);
             if (enabled && !isEnabled) {
-                await autoLauncher.enable();
+                await launcher.enable();
             } else if (!enabled && isEnabled) {
-                await autoLauncher.disable();
+                await launcher.disable();
             }
         }
     } catch (error) {
