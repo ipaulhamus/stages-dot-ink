@@ -10,7 +10,7 @@
   * Has the option to automically open the widget upon device startup
 </details>
 <details>
-  <summary>How To Install / Use</summary>
+  <summary>How To Install & Use</summary>
 
  (This application is currently only available for Windows, I plan on making releases for Linux and Mac soon, but there are some issues to iron out)
  
@@ -24,9 +24,11 @@
 <details>
   <summary>Tech Stack / Credits</summary>
 
-  ### Languages / Frameworks ###
+  ### Languages & Frameworks ###
   * JavaScript
   * Electron.js (Desktop Application Framework)
   * Node.js (Package Manager)
   * CSS Modules (Styling)
+  ### Credits ###
+  * Stages API From Splatoon3.ink: https://splatoon3.ink/data/schedules.json
 </details>
