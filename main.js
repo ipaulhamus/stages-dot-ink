@@ -13,9 +13,8 @@ import { app, BrowserWindow, ipcMain, screen } from 'electron';
 import { ColorSettingsIndex, SizeSettings, SizeSettingsIndex } from './workspace/js/settingsReferences.js';
 import { saveWindowPosition, saveWindowColors, saveWindowSize, loadWindowColors, loadWindowPosition, loadWindowSize, loadAutoLaunchSetting, saveAutoLaunchSetting } from './workspace/js/settings.js';
 import { execSync } from 'child_process';
-import { Console } from 'console';
-import { platform } from 'os';
-import { defaultMaxListeners } from 'events';
+import fs from 'fs';
+import path from 'path';
 
 const dataTypes = ["regularSchedules", "bankaraSchedules", "bankaraSchedules-series", "xSchedules", "festSchedules"];
 let autoLauncher = null;
@@ -100,7 +99,7 @@ app.whenReady().then(async () => {
     const savedAutoLaunch = await loadAutoLaunchSetting();
     createWindow(savedSize ?? SizeSettingsIndex.MEDIUM);
 
-    if (process.platform === 'linux') {
+    if (process.platform === 'linux' || process.platform === 'darwin') {
         await getAutoLauncher();
     }
 
@@ -306,12 +305,17 @@ function applyWindowSize(window, sizeObject) {
 
 async function applyAutoLaunchSetting(enabled) {
     try {
-        if (process.platform === 'win32' || process.platform === 'darwin') {
-            app.setLoginItemSettings({ openAtLogin: enabled });
+
+        console.log("Setting auto-open! Passed Value: " + enabled);
+
+        if (process.platform === 'win32') {
+            app.setLoginItemSettings({
+                openAtLogin: enabled
+            });
             return;
         }
 
-        if (process.platform === 'linux') {
+        if (process.platform === 'linux' || process.platform === 'darwin') {
             const launcher = autoLauncher ?? await getAutoLauncher();
             if (!launcher) {
                 return;
